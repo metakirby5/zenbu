@@ -6,7 +6,7 @@ A pystache based config templater.
 Searches for a yaml file with variables in
 ~/.config/whizkers/variables.yaml
 
-and uses the templates in
+and (by default) uses the templates in
 ~/.config/whizkers/templates/
 
 to render into your home directory.
@@ -38,12 +38,18 @@ WHIZKERS_TEMPLATES = os.path.join(
 def parse_args():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-t',
-                        help="template directory",
+                        help="""
+                        template directory.
+                        Default: %s
+                        """ % WHIZKERS_TEMPLATES,
                         dest='template_dir',
                         type=str,
                         default=WHIZKERS_TEMPLATES)
     parser.add_argument('-d',
-                        help="destination directory",
+                        help="""
+                        destination directory.
+                        Default: %s
+                        """ % HOME,
                         dest='dest_dir',
                         type=str,
                         default=HOME)
