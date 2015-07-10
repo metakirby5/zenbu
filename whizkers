@@ -2,15 +2,22 @@
 
 description = """
 A pystache based config templater.
+
 Searches for a yaml file with variables in
 ~/.config/whizkers/variables.yaml
+
 and uses the templates in
 ~/.config/whizkers/templates/
+
 to render into your home directory.
+
+Additional variable files can be applied
+by supplying them as arguments, in order of application.
 """
 
 import os
 import sys
+import argparse
 import yaml
 import re
 from pystache import render
@@ -22,26 +29,66 @@ CONFIG_DIR = os.getenv(
     os.path.join(HOME, '.config'))
 WHIZKERS_ROOT = os.path.join(
     CONFIG_DIR, 'whizkers')
-WHIZKERS_CONFIG = os.path.join(
+WHIZKERS_VARS = os.path.join(
     WHIZKERS_ROOT, 'variables.yaml')
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-t',
+                        help="template directory",
+                        dest='template_dir',
+                        type=str,
+                        default=WHIZKERS_TEMPLATES)
+    parser.add_argument('-d',
+                        help="destination directory",
+                        dest='dest_dir',
+                        type=str,
+                        default=HOME)
+    parser.add_argument('variable_files',
+                        help="additional variable files",
+                        nargs='*',
+                        type=str)
+    return parser.parse_args()
+
+
 def main():
+    errs = False
+    args = parse_args()
+
+    variables = {}
+
     # Read the config
     try:
-        with open(WHIZKERS_CONFIG, 'r') as f:
-            variables = yaml.load(f.read())
+        with open(WHIZKERS_VARS, 'r') as f:
+            variables.update(yaml.load(f.read()) or {})
     except IOError:
-        print('%s not found.' % WHIZKERS_CONFIG)
+        pass
+
+    # Read additional files
+    for name in args.variable_files:
+        try:
+            with open(name, 'r') as f:
+                variables.update(yaml.load(f.read()) or {})
+        except IOError:
+            print('Variable file %s not found.' % name)
+            errs = True
+
+    if not variables:
+        print('No variables provided.')
+        errs = True
+
+    # Errors?
+    if errs:
         sys.exit(1)
 
     # Loop through the templates
-    for root, subdirs, files in os.walk(WHIZKERS_TEMPLATES):
+    for root, subdirs, files in os.walk(args.template_dir):
         # Substitute the template dir for home dir
-        dest_root = re.sub('^%s' % WHIZKERS_TEMPLATES,
-                           HOME, root)
+        dest_root = re.sub('^%s' % args.template_dir,
+                           args.dest_dir, root)
 
         # Iterate through templates
         for name in files:
