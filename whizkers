@@ -1,0 +1,58 @@
+#!/usr/bin/env python2
+
+description = """
+A pystache based config templater.
+Searches for a yaml file with variables in
+~/.config/whizkers/variables.yaml
+and uses the templates in
+~/.config/whizkers/templates/
+to render into your home directory.
+"""
+
+import os
+import sys
+import yaml
+import re
+from pystache import render
+
+
+HOME = os.getenv('HOME')
+CONFIG_DIR = os.getenv(
+    'XDG_CONFIG_HOME',
+    os.path.join(HOME, '.config'))
+WHIZKERS_ROOT = os.path.join(
+    CONFIG_DIR, 'whizkers')
+WHIZKERS_CONFIG = os.path.join(
+    WHIZKERS_ROOT, 'variables.yaml')
+WHIZKERS_TEMPLATES = os.path.join(
+    WHIZKERS_ROOT, 'templates')
+
+
+def main():
+    # Read the config
+    try:
+        with open(WHIZKERS_CONFIG, 'r') as f:
+            variables = yaml.load(f.read())
+    except IOError:
+        print('%s not found.' % WHIZKERS_CONFIG)
+        sys.exit(1)
+
+    # Loop through the templates
+    for root, subdirs, files in os.walk(WHIZKERS_TEMPLATES):
+        # Substitute the template dir for home dir
+        dest_root = re.sub('^%s' % WHIZKERS_TEMPLATES,
+                           HOME, root)
+
+        # Iterate through templates
+        for name in files:
+            template = os.path.join(root, name)
+            dest_file = os.path.join(dest_root, name)
+
+            # Apply variables
+            with open(template, 'r') as f:
+                applied = render(f.read(), variables)
+                with open(dest_file, 'w') as g:
+                    g.write(applied)
+
+if __name__ == '__main__':
+    main()
