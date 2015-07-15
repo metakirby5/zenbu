@@ -16,6 +16,10 @@ to render into your home directory.
 
 Additional variable files can be applied
 by supplying them as arguments, in order of application.
+
+They can either be paths or, if located in
+~/.config/whizkers/variable_sets/,
+extension-less filenames.
 """
 
 import os
@@ -35,13 +39,24 @@ WHIZKERS_ROOT = os.path.join(
     CONFIG_DIR, 'whizkers')
 WHIZKERS_VARS = os.path.join(
     WHIZKERS_ROOT, 'variables.yaml')
+WHIZKERS_VAR_SETS = os.path.join(
+    WHIZKERS_ROOT, 'variable_sets')
 WHIZKERS_IGNORES = os.path.join(
     WHIZKERS_ROOT, 'ignores.yaml')
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
 
+STR_USING = "Using \"%s\"..."
+
 def parse_args():
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-l',
+                        help="""
+                        list variable sets.
+                        """,
+                        dest='list_var_sets',
+                        action='store_true',
+                        default=False)
     parser.add_argument('-t',
                         help="""
                         template directory.
@@ -80,10 +95,38 @@ def main():
     variables = {}
     ignores = set()
 
+    # Read ignores file
+    try:
+        with codecs.open(args.ignores_file, 'r', 'utf-8') as f:
+            ignores |= set(yaml.load(f.read()))
+    except IOError:
+        pass
+
+    # Pre-compile regexes
+    ignores = [re.compile(i) for i in ignores]
+
+    # Did we request a listing of variable sets?
+    if args.list_var_sets:
+        if os.path.exists(WHIZKERS_VAR_SETS):
+            for name in os.listdir(WHIZKERS_VAR_SETS):
+                path = os.path.join(WHIZKERS_VAR_SETS, name)
+                if os.path.isfile(path):
+                    ignore = False
+                    for pattern in ignores:
+                        if pattern.match(name):
+                            ignore = True
+                            break
+                    if not ignore:
+                        print(name.rstrip('.yaml'))
+        else:
+            print("Variable sets folder %s not found." % WHIZKERS_VAR_SETS)
+        sys.exit(0)
+
     # Read the config
     try:
         with codecs.open(WHIZKERS_VARS, 'r', 'utf-8') as f:
             variables.update(yaml.load(f.read()) or {})
+            print(STR_USING % WHIZKERS_VARS)
     except IOError:
         pass
 
@@ -92,27 +135,32 @@ def main():
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
                 variables.update(yaml.load(f.read()) or {})
+                print(STR_USING % name)
         except IOError:
-            print('Variable file %s not found.' % name)
-            errs = True
+
+            # Try opening just by name
+            name = os.path.join(WHIZKERS_VAR_SETS, '%s.yaml' % name)
+            try:
+                with codecs.open(name, 'r', 'utf-8') as f:
+                    variables.update(yaml.load(f.read()) or {})
+                    print(STR_USING % name)
+            except IOError:
+                print("Variable file %s not found." % name)
+                errs = True
 
     if not variables:
-        print('No variables provided.')
+        print("No variables provided.")
         errs = True
-
-    # Read ignores file
-    try:
-        with codecs.open(args.ignores_file, 'r', 'utf-8') as f:
-            ignores |= set(yaml.load(f.read()))
-    except IOError:
-        pass
 
     # Errors?
     if errs:
+        print
+        print("Errors occurred - abort.")
         sys.exit(1)
 
     # Loop through the templates
     for root, subdirs, files in os.walk(args.template_dir):
+
         # Substitute the template dir for home dir
         dest_root = re.sub('^%s' % args.template_dir,
                            args.dest_dir, root)
@@ -123,7 +171,7 @@ def main():
 
             # Check ignore list
             for pattern in ignores:
-                if re.match(pattern, name):
+                if pattern.match(name):
                     ignore = True
                     break
 
