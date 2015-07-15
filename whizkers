@@ -133,6 +133,10 @@ def main():
             template = os.path.join(root, name)
             dest_file = os.path.join(dest_root, name)
 
+            # Make the directory
+            if not os.path.exists(dest_root):
+                os.makedirs(dest_root)
+
             # Apply variables
             with codecs.open(template, 'r', 'utf-8') as f:
                 applied = render(f.read(), variables)
