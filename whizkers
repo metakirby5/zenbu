@@ -3,10 +3,13 @@
 description = """
 A pystache based config templater.
 
-Searches for a yaml file with variables in
-~/.config/whizkers/variables.yaml
+Searches for a yaml file with a variable mapping in
+~/.config/whizkers/variables.yaml,
 
-and (by default) uses the templates in
+a yaml file with an ignore sequence in (by default)
+~/.config/whizkers/ignores.yaml,
+
+and uses the templates in (by default)
 ~/.config/whizkers/templates/
 
 to render into your home directory.
@@ -32,11 +35,10 @@ WHIZKERS_ROOT = os.path.join(
     CONFIG_DIR, 'whizkers')
 WHIZKERS_VARS = os.path.join(
     WHIZKERS_ROOT, 'variables.yaml')
+WHIZKERS_IGNORES = os.path.join(
+    WHIZKERS_ROOT, 'ignores.yaml')
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
-
-# TODO put into yaml config
-IGNORES = ['^.*\.swp$']
 
 def parse_args():
     parser = argparse.ArgumentParser(description=description)
@@ -56,6 +58,14 @@ def parse_args():
                         dest='dest_dir',
                         type=str,
                         default=HOME)
+    parser.add_argument('-i',
+                        help="""
+                        ignores file.
+                        Default: %s
+                        """ % WHIZKERS_IGNORES,
+                        dest='ignores_file',
+                        type=str,
+                        default=WHIZKERS_IGNORES)
     parser.add_argument('variable_files',
                         help="additional variable files",
                         nargs='*',
@@ -68,6 +78,7 @@ def main():
     args = parse_args()
 
     variables = {}
+    ignores = set()
 
     # Read the config
     try:
@@ -89,6 +100,13 @@ def main():
         print('No variables provided.')
         errs = True
 
+    # Read ignores file
+    try:
+        with codecs.open(args.ignores_file, 'r', 'utf-8') as f:
+            ignores |= set(yaml.load(f.read()))
+    except IOError:
+        pass
+
     # Errors?
     if errs:
         sys.exit(1)
@@ -104,7 +122,7 @@ def main():
             ignore = False
 
             # Check ignore list
-            for pattern in IGNORES:
+            for pattern in ignores:
                 if re.match(pattern, name):
                     ignore = True
                     break
