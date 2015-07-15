@@ -17,6 +17,7 @@ by supplying them as arguments, in order of application.
 
 import os
 import sys
+import codecs
 import argparse
 import yaml
 import re
@@ -34,6 +35,8 @@ WHIZKERS_VARS = os.path.join(
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
 
+# TODO put into yaml config
+IGNORES = ['^.*\.swp$']
 
 def parse_args():
     parser = argparse.ArgumentParser(description=description)
@@ -68,7 +71,7 @@ def main():
 
     # Read the config
     try:
-        with open(WHIZKERS_VARS, 'r') as f:
+        with codecs.open(WHIZKERS_VARS, 'r', 'utf-8') as f:
             variables.update(yaml.load(f.read()) or {})
     except IOError:
         pass
@@ -76,7 +79,7 @@ def main():
     # Read additional files
     for name in args.variable_files:
         try:
-            with open(name, 'r') as f:
+            with codecs.open(name, 'r', 'utf-8') as f:
                 variables.update(yaml.load(f.read()) or {})
         except IOError:
             print('Variable file %s not found.' % name)
@@ -98,13 +101,24 @@ def main():
 
         # Iterate through templates
         for name in files:
+            ignore = False
+
+            # Check ignore list
+            for pattern in IGNORES:
+                if re.match(pattern, name):
+                    ignore = True
+                    break
+
+            if ignore:
+                continue
+
             template = os.path.join(root, name)
             dest_file = os.path.join(dest_root, name)
 
             # Apply variables
-            with open(template, 'r') as f:
+            with codecs.open(template, 'r', 'utf-8') as f:
                 applied = render(f.read(), variables)
-                with open(dest_file, 'w') as g:
+                with codecs.open(dest_file, 'w', 'utf-8') as g:
                     g.write(applied)
 
 if __name__ == '__main__':
