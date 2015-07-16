@@ -12,7 +12,7 @@ a yaml file with an ignore sequence in (by default)
 and uses the templates in (by default)
 ~/.config/whizkers/templates/
 
-to render into your home directory.
+to render into your home directory (by default).
 
 Additional variable files can be applied
 by supplying them as arguments, in order of application.
@@ -23,12 +23,15 @@ extension-less filenames.
 """
 
 import os
-import sys
 import codecs
-import argparse
 import yaml
 import re
-from pystache import render
+from sys import exit
+from argparse import ArgumentParser
+from termcolor import cprint
+from pystache.renderer import Renderer
+from pystache.common import MissingTags
+from pystache.context import KeyNotFoundError
 
 
 HOME = os.getenv('HOME')
@@ -46,10 +49,8 @@ WHIZKERS_IGNORES = os.path.join(
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
 
-STR_USING = "Using \"%s\"..."
-
 def parse_args():
-    parser = argparse.ArgumentParser(description=description)
+    parser = ArgumentParser(description=description)
     parser.add_argument('-l',
                         help="""
                         list variable sets.
@@ -94,6 +95,16 @@ def main():
 
     variables = {}
     ignores = set()
+    renderer = Renderer(
+        missing_tags=MissingTags.strict,    # Alert on missing vars
+        escape=lambda _: _,                 # Don't escape
+    )
+
+    # Helper functions
+    def update_variables(filename):
+        with codecs.open(filename, 'r', 'utf-8') as f:
+            variables.update(yaml.load(f.read()) or {})
+            print("Using \"%s\"..." % filename)
 
     # Read ignores file
     try:
@@ -107,56 +118,61 @@ def main():
 
     # Did we request a listing of variable sets?
     if args.list_var_sets:
+
+        # Does our folder exist?
         if os.path.exists(WHIZKERS_VAR_SETS):
+
+            # Get all the paths...
             for name in os.listdir(WHIZKERS_VAR_SETS):
                 path = os.path.join(WHIZKERS_VAR_SETS, name)
                 if os.path.isfile(path):
+
+                    # Check if we should ignore it
                     ignore = False
+
                     for pattern in ignores:
                         if pattern.match(name):
                             ignore = True
                             break
+
                     if not ignore:
                         print(name.rstrip('.yaml'))
         else:
-            print("Variable sets folder %s not found." % WHIZKERS_VAR_SETS)
-        sys.exit(0)
+            cprint("Variable sets folder %s not found." % WHIZKERS_VAR_SETS,
+                   'yellow')
+        exit(0)
 
     # Read the config
     try:
-        with codecs.open(WHIZKERS_VARS, 'r', 'utf-8') as f:
-            variables.update(yaml.load(f.read()) or {})
-            print(STR_USING % WHIZKERS_VARS)
+        update_variables(WHIZKERS_VARS)
     except IOError:
         pass
 
     # Read additional files
     for name in args.variable_files:
         try:
-            with codecs.open(name, 'r', 'utf-8') as f:
-                variables.update(yaml.load(f.read()) or {})
-                print(STR_USING % name)
+            update_variables(name)
         except IOError:
 
             # Try opening just by name
             name = os.path.join(WHIZKERS_VAR_SETS, '%s.yaml' % name)
             try:
-                with codecs.open(name, 'r', 'utf-8') as f:
-                    variables.update(yaml.load(f.read()) or {})
-                    print(STR_USING % name)
+                update_variables(name)
             except IOError:
-                print("Variable file %s not found." % name)
+                cprint("Variable file %s not found." % name, 'red')
                 errs = True
 
     if not variables:
-        print("No variables provided.")
+        cprint("No variables provided.", 'red')
         errs = True
 
     # Errors?
     if errs:
-        print
-        print("Errors occurred - abort.")
-        sys.exit(1)
+        cprint("\nErrors occurred - abort.", 'red')
+        exit(1)
+
+    # Exit code, in case one of the templates doesn't render
+    exit_code = 0
 
     # Loop through the templates
     for root, subdirs, files in os.walk(args.template_dir):
@@ -186,10 +202,18 @@ def main():
                 os.makedirs(dest_root)
 
             # Apply variables
-            with codecs.open(template, 'r', 'utf-8') as f:
-                applied = render(f.read(), variables)
-                with codecs.open(dest_file, 'w', 'utf-8') as g:
-                    g.write(applied)
+            try:
+                with codecs.open(template, 'r', 'utf-8') as f:
+                    applied = renderer.render(f.read(), variables)
+            except KeyNotFoundError as e:
+                cprint("Render error in %s:\n    %s" % (template, e), 'red')
+                exit_code = 1
+            else:
+                with codecs.open(dest_file, 'w', 'utf-8') as f:
+                    f.write(applied)
+                cprint("Successfully rendered %s." % template, 'green')
+
+    exit(exit_code)
 
 if __name__ == '__main__':
     main()
