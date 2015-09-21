@@ -136,7 +136,7 @@ def main():
                             break
 
                     if not ignore:
-                        print(name.rstrip('.yaml'))
+                        print(re.sub('\.yaml$', '', name))
         else:
             cprint("Variable sets folder %s not found." % WHIZKERS_VAR_SETS,
                    'yellow')
