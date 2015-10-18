@@ -30,4 +30,4 @@ optional arguments:
 # Thanks to
 - https://gist.github.com/coleifer/33484bff21c34644dae1
 - https://github.com/defunkt/pystache
-- http://yaml.org/
+- http://pyyaml.org/
