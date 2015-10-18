@@ -1,14 +1,19 @@
 # whizkers
-Pystache based config templater.
+Pystache + YAML based config templater.
+
+# Dependencies
+- pystache
+- PyYAML
+- termcolor
 
 # Usage
 ```
 usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-i IGNORES_FILE]
                 [variable_files [variable_files ...]]
 
-A pystache based config templater. Searches for a yaml file with a variable
-mapping in ~/.config/whizkers/variables.yaml, a yaml file with an ignore
-sequence in (by default) ~/.config/whizkers/ignores.yaml, and uses the
+A pystache + YAML based config templater. Searches for a yaml file with a
+variable mapping in ~/.config/whizkers/variables.yaml, a yaml file with an
+ignore sequence in (by default) ~/.config/whizkers/ignores.yaml, and uses the
 templates in (by default) ~/.config/whizkers/templates/ to render into your
 home directory (by default). Additional variable files can be applied by
 supplying them as arguments, in order of application. They can either be paths

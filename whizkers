@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 description = """
-A pystache based config templater.
+A pystache + YAML based config templater.
 
 Searches for a yaml file with a variable mapping in
 ~/.config/whizkers/variables.yaml,
