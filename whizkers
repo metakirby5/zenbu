@@ -20,6 +20,9 @@ by supplying them as arguments, in order of application.
 They can either be paths or, if located in
 ~/.config/whizkers/variable_sets/,
 extension-less filenames.
+
+Environment variable support is available;
+simply put the name of the variable in mustache brackets.
 """
 
 import os
@@ -82,6 +85,14 @@ def parse_args():
                         dest='ignores_file',
                         type=str,
                         default=WHIZKERS_IGNORES)
+    parser.add_argument('-e',
+                        help="""
+                        whether or not to use environment variables.
+                        Default: don't use environment variables
+                        """,
+                        dest='env_vars',
+                        action='store_true',
+                        default=False)
     parser.add_argument('variable_files',
                         help="additional variable files",
                         nargs='*',
@@ -93,11 +104,17 @@ def main():
     errs = False
     args = parse_args()
 
-    variables = {}
+    # Add environment variables if requested
+    if args.env_vars:
+        print("Using environment variables...")
+        variables = dict(os.environ)
+    else:
+        variables = {}
+
     ignores = set()
     renderer = Renderer(
         missing_tags=MissingTags.strict,    # Alert on missing vars
-        escape=lambda _: _,                 # Don't escape
+        escape=lambda x: x,                 # Don't escape
     )
 
     # Helper functions
@@ -209,6 +226,12 @@ def main():
                 cprint("Render error in %s:\n    %s" % (template, e), 'red')
                 exit_code = 1
             else:
+                # Delete any existing file first
+                try:
+                    os.remove(dest_file)
+                except OSError:
+                    pass
+
                 with codecs.open(dest_file, 'w', 'utf-8') as f:
                     f.write(applied)
                 cprint("Successfully rendered %s." % template, 'green')

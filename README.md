@@ -9,6 +9,7 @@ Pystache + YAML based config templater.
 # Usage
 ```
 usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-i IGNORES_FILE]
+                [-e]
                 [variable_files [variable_files ...]]
 
 A pystache + YAML based config templater. Searches for a yaml file with a
@@ -18,6 +19,8 @@ templates in (by default) ~/.config/whizkers/templates/ to render into your
 home directory (by default). Additional variable files can be applied by
 supplying them as arguments, in order of application. They can either be paths
 or, if located in ~/.config/whizkers/variable_sets/, extension-less filenames.
+Environment variable support is available; simply put the name of the variable
+in mustache brackets.
 
 positional arguments:
   variable_files   additional variable files
@@ -30,6 +33,8 @@ optional arguments:
   -d DEST_DIR      destination directory. Default: /home/echan
   -i IGNORES_FILE  ignores file. Default:
                    /home/echan/.config/whizkers/ignores.yaml
+  -e               whether or not to use environment variables. Default: don't
+                   use environment variables
 ```
 
 # Thanks to
