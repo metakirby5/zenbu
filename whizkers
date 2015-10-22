@@ -40,8 +40,8 @@ CONFIG_DIR = os.getenv(
     os.path.join(HOME, '.config'))
 WHIZKERS_ROOT = os.path.join(
     CONFIG_DIR, 'whizkers')
-WHIZKERS_VARS = os.path.join(
-    WHIZKERS_ROOT, 'variables.yaml')
+WHIZKERS_DEFAULTS = os.path.join(
+    WHIZKERS_ROOT, 'defaults.yaml')
 WHIZKERS_VAR_SETS = os.path.join(
     WHIZKERS_ROOT, 'variable_sets')
 WHIZKERS_IGNORES = os.path.join(
@@ -144,7 +144,7 @@ def main():
 
     # Read the config
     try:
-        update_variables(WHIZKERS_VARS)
+        update_variables(WHIZKERS_DEFAULTS)
     except IOError:
         pass
 
