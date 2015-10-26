@@ -3,10 +3,10 @@
 description = """
 A pystache + YAML based config templater.
 
-Searches for a yaml file with a variable mapping in
+Searches for an optional yaml file with a variable mapping in
 ~/.config/whizkers/variables.yaml,
 
-a yaml file with an ignore sequence in (by default)
+an optional yaml file with an ignore scalar in (by default)
 ~/.config/whizkers/ignores.yaml,
 
 and uses the templates in (by default)
@@ -23,6 +23,9 @@ extension-less filenames.
 
 Environment variable support is available;
 simply put the name of the variable in mustache brackets.
+
+Finally, diffs between the current destination files and
+template renderings are available via command-line flag.
 """
 
 import os
@@ -30,6 +33,7 @@ import codecs
 import yaml
 import re
 from sys import exit
+from difflib import context_diff
 from argparse import ArgumentParser
 from termcolor import cprint
 from pystache.renderer import Renderer
@@ -93,6 +97,13 @@ def parse_args():
                         dest='env_vars',
                         action='store_true',
                         default=False)
+    parser.add_argument('--diff',
+                        help="""
+                        show diff between template renderings and current
+                        destination files
+                        """,
+                        action='store_true',
+                        default=False)
     parser.add_argument('variable_files',
                         help="additional variable files",
                         nargs='*',
@@ -101,34 +112,51 @@ def parse_args():
 
 
 def main():
-    errs = False
     args = parse_args()
-
-    # Add environment variables if requested
-    if args.env_vars:
-        print("Using environment variables...")
-        variables = dict(os.environ)
-    else:
-        variables = {}
-
+    errs = False
+    variables = {}
     ignores = set()
+
     renderer = Renderer(
         missing_tags=MissingTags.strict,    # Alert on missing vars
         escape=lambda x: x,                 # Don't escape
     )
 
-    # Helper functions
-    def update_variables(filename):
+    # How to update variables - returns success
+    def update_variables(variables, filename):
         with codecs.open(filename, 'r', 'utf-8') as f:
-            variables.update(yaml.load(f.read()) or {})
-            print("Using \"%s\"..." % filename)
+            try:
+                to_merge = yaml.load(f.read())
+            except yaml.parser.ParserError:
+                cprint("\"%s\" could not be parsed." % filename, 'red')
+                return False
+            else:
+                if isinstance(to_merge, dict):
+                    variables.update(to_merge)
+                    print("Using \"%s\"..." % filename)
+                    return True
+                else:
+                    cprint("\"%s\" was not in mapping format." %
+                           filename, 'red')
+                    return False
+
+    # Use environment variables if requested
+    if args.env_vars:
+        print("Using environment variables...")
+        variables.update(dict(os.environ))
 
     # Read ignores file
     try:
         with codecs.open(args.ignores_file, 'r', 'utf-8') as f:
-            ignores |= set(yaml.load(f.read()))
+            to_merge = yaml.load(f.read())
+        if isinstance(to_merge, list):
+            ignores |= set(to_merge)
+        else:
+            cprint("\"%s\" was not in scalar format." %
+                   args.ignores_file, 'red')
+            errs = True
     except IOError:
-        pass
+        cprint("No ignores file found. Skipping...", 'yellow')
 
     # Pre-compile regexes
     ignores = [re.compile(i) for i in ignores]
@@ -161,20 +189,20 @@ def main():
 
     # Read the config
     try:
-        update_variables(WHIZKERS_DEFAULTS)
+        errs |= not update_variables(variables, WHIZKERS_DEFAULTS)
     except IOError:
-        pass
+        cprint("No default variables file found. Skipping...", 'yellow')
 
     # Read additional files
     for name in args.variable_files:
         try:
-            update_variables(name)
+            errs |= not update_variables(variables, name)
         except IOError:
 
             # Try opening just by name
             name = os.path.join(WHIZKERS_VAR_SETS, '%s.yaml' % name)
             try:
-                update_variables(name)
+                errs |= not update_variables(variables, name)
             except IOError:
                 cprint("Variable file %s not found." % name, 'red')
                 errs = True
@@ -190,6 +218,9 @@ def main():
 
     # Exit code, in case one of the templates doesn't render
     exit_code = 0
+
+    if args.diff:
+        cprint("\nShowing diffs...", attrs=['underline'])
 
     # Loop through the templates
     for root, subdirs, files in os.walk(args.template_dir):
@@ -223,18 +254,40 @@ def main():
                 with codecs.open(template, 'r', 'utf-8') as f:
                     applied = renderer.render(f.read(), variables)
             except KeyNotFoundError as e:
-                cprint("Render error in %s:\n    %s" % (template, e), 'red')
+                cprint("Render error in \"%s\":\n    %s" %
+                       (template, e), 'red')
                 exit_code = 1
             else:
-                # Delete any existing file first
-                try:
-                    os.remove(dest_file)
-                except OSError:
-                    pass
+                if args.diff:
+                    with codecs.open(dest_file, 'r', 'utf-8') as f:
+                        diff = context_diff(
+                            f.readlines(), applied.splitlines(True),
+                            fromfile='%s (rendered)' % dest_file,
+                            tofile=dest_file)
+                    firstline = True
+                    for line in diff:
+                        if firstline:
+                            print('')
+                            firstline = False
+                        line = line.rstrip('\n')
+                        if re.match('^!', line):
+                            cprint(line, 'yellow')
+                        elif re.match('^[-*]', line):
+                            cprint(line, attrs=['bold'])
+                        else:
+                            print(line)
 
-                with codecs.open(dest_file, 'w', 'utf-8') as f:
-                    f.write(applied)
-                cprint("Successfully rendered %s." % template, 'green')
+                # Render
+                else:
+                    # Delete any existing file first
+                    try:
+                        os.remove(dest_file)
+                    except OSError:
+                        pass
+
+                    with codecs.open(dest_file, 'w', 'utf-8') as f:
+                        f.write(applied)
+                    cprint("Successfully rendered %s." % template, 'green')
 
     exit(exit_code)
 

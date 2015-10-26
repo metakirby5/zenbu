@@ -9,18 +9,20 @@ Pystache + YAML based config templater.
 # Usage
 ```
 usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-i IGNORES_FILE]
-                [-e]
+                [-e] [--diff]
                 [variable_files [variable_files ...]]
 
-A pystache + YAML based config templater. Searches for a yaml file with a
-variable mapping in ~/.config/whizkers/variables.yaml, a yaml file with an
-ignore sequence in (by default) ~/.config/whizkers/ignores.yaml, and uses the
-templates in (by default) ~/.config/whizkers/templates/ to render into your
-home directory (by default). Additional variable files can be applied by
-supplying them as arguments, in order of application. They can either be paths
-or, if located in ~/.config/whizkers/variable_sets/, extension-less filenames.
-Environment variable support is available; simply put the name of the variable
-in mustache brackets.
+A pystache + YAML based config templater. Searches for an optional yaml file
+with a variable mapping in ~/.config/whizkers/variables.yaml, an optional yaml
+file with an ignore scalar in (by default) ~/.config/whizkers/ignores.yaml,
+and uses the templates in (by default) ~/.config/whizkers/templates/ to render
+into your home directory (by default). Additional variable files can be
+applied by supplying them as arguments, in order of application. They can
+either be paths or, if located in ~/.config/whizkers/variable_sets/,
+extension-less filenames. Environment variable support is available; simply
+put the name of the variable in mustache brackets. Finally, diffs between the
+current destination files and template renderings are available via command-
+line flag.
 
 positional arguments:
   variable_files   additional variable files
@@ -35,7 +37,12 @@ optional arguments:
                    /home/echan/.config/whizkers/ignores.yaml
   -e               whether or not to use environment variables. Default: don't
                    use environment variables
+  --diff           show diff between template renderings and current
+                   destination files
 ```
+
+# Todo
+- Refactor code to OOP, it's a bit messy right now
 
 # Thanks to
 - https://gist.github.com/coleifer/33484bff21c34644dae1
