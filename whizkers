@@ -140,11 +140,6 @@ def main():
                            filename, 'red')
                     return False
 
-    # Use environment variables if requested
-    if args.env_vars:
-        print("Using environment variables...")
-        variables.update(dict(os.environ))
-
     # Read ignores file
     try:
         with codecs.open(args.ignores_file, 'r', 'utf-8') as f:
@@ -186,6 +181,11 @@ def main():
             cprint("Variable sets folder %s not found." % WHIZKERS_VAR_SETS,
                    'yellow')
         exit(0)
+
+    # Use environment variables if requested
+    if args.env_vars:
+        print("Using environment variables...")
+        variables.update(dict(os.environ))
 
     # Read the config
     try:
@@ -271,11 +271,11 @@ def main():
                             firstline = False
                         line = line.rstrip('\n')
                         if re.match('^!', line):
-                            cprint(line, 'yellow')
+                            cprint(line.encode('utf-8'), 'yellow')
                         elif re.match('^[-*]', line):
-                            cprint(line, attrs=['bold'])
+                            cprint(line.encode('utf-8'), attrs=['bold'])
                         else:
-                            print(line)
+                            print(line.encode('utf-8'))
 
                 # Render
                 else:
