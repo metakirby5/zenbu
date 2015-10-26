@@ -286,6 +286,8 @@ def main():
                                 cprint(line.encode('utf-8'), 'green')
                             elif re.match('^-', line):
                                 cprint(line.encode('utf-8'), 'red')
+                            elif re.match('^\?', line):
+                                cprint(line.encode('utf-8'), 'yellow')
                             else:
                                 print(line.encode('utf-8'))
 
