@@ -33,7 +33,7 @@ import codecs
 import yaml
 import re
 from sys import exit
-from difflib import context_diff
+from difflib import unified_diff
 from argparse import ArgumentParser
 from termcolor import cprint
 from pystache.renderer import Renderer
@@ -254,28 +254,40 @@ def main():
                 with codecs.open(template, 'r', 'utf-8') as f:
                     applied = renderer.render(f.read(), variables)
             except KeyNotFoundError as e:
-                cprint("Render error in \"%s\":\n    %s" %
-                       (template, e), 'red')
+                # Add a newline if we're doing diffs
+                if args.diff:
+                    print('')
+                cprint("Render error in \"%s\":" % template, 'red')
+                cprint("    %s" % e, 'red')
                 exit_code = 1
             else:
                 if args.diff:
-                    with codecs.open(dest_file, 'r', 'utf-8') as f:
-                        diff = context_diff(
-                            f.readlines(), applied.splitlines(True),
-                            fromfile='%s (rendered)' % dest_file,
-                            tofile=dest_file)
-                    firstline = True
-                    for line in diff:
-                        if firstline:
-                            print('')
-                            firstline = False
-                        line = line.rstrip('\n')
-                        if re.match('^!', line):
-                            cprint(line.encode('utf-8'), 'yellow')
-                        elif re.match('^[-*]', line):
-                            cprint(line.encode('utf-8'), attrs=['bold'])
-                        else:
-                            print(line.encode('utf-8'))
+                    try:
+                        with codecs.open(dest_file, 'r', 'utf-8') as f:
+                            diff = unified_diff(
+                                f.readlines(), applied.splitlines(True),
+                                fromfile='%s (rendered)' % dest_file,
+                                tofile=dest_file)
+                    # File missing
+                    except IOError:
+                        cprint(
+                            '\nNo destination file \"%s\" for comparison.' %
+                            dest_file, 'yellow')
+                    else:
+                        firstline = True
+                        for line in diff:
+                            if firstline:
+                                print('')
+                                firstline = False
+                            line = line.rstrip('\n')
+                            if re.match('^(---|\+\+\+|@@)', line):
+                                cprint(line.encode('utf-8'), attrs=['bold'])
+                            elif re.match('^\+', line):
+                                cprint(line.encode('utf-8'), 'green')
+                            elif re.match('^-', line):
+                                cprint(line.encode('utf-8'), 'red')
+                            else:
+                                print(line.encode('utf-8'))
 
                 # Render
                 else:
