@@ -44,9 +44,6 @@ optional arguments:
                    destination files
 ```
 
-# Todo
-- Refactor code to OOP, it's a bit messy right now
-
 # Thanks to
 - https://gist.github.com/coleifer/33484bff21c34644dae1
 - https://github.com/defunkt/pystache
