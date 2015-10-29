@@ -2,6 +2,7 @@
 Pystache + YAML based config templater.
 
 # Dependencies
+- Python 2
 - pystache
 - PyYAML
 - termcolor
