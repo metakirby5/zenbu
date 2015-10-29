@@ -24,6 +24,11 @@ extension-less filenames.
 Environment variable support is available;
 simply put the name of the variable in mustache brackets.
 
+Order of precedence is:
+last YAML variable defined >
+first YAML variable defined >
+environment variables
+
 Finally, diffs between the current destination files and
 template renderings are available via command-line flag.
 """

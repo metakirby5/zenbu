@@ -23,8 +23,9 @@ applied by supplying them as arguments, in order of application. They can
 either be paths or, if located in (by default)
 ~/.config/whizkers/variable_sets/, extension-less filenames. Environment
 variable support is available; simply put the name of the variable in mustache
-brackets. Finally, diffs between the current destination files and template
-renderings are available via command-line flag.
+brackets. Order of precedence is: last YAML variable defined > first YAML
+variable defined > environment variables Finally, diffs between the current
+destination files and template renderings are available via command-line flag.
 
 positional arguments:
   variable_files   additional variable files
