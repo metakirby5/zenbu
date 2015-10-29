@@ -116,6 +116,9 @@ class FileRenderError(PathException):
 
 
 class Whizker:
+    """
+    A template manager.
+    """
     def __init__(self,
                  templates_path,
                  dest_path,
@@ -131,6 +134,7 @@ class Whizker:
             escape=lambda x: x,                 # Don't escape
         )
 
+        # Check paths
         if os.path.exists(templates_path):
             self.templates_path = templates_path
         else:
@@ -188,6 +192,9 @@ class Whizker:
                 raise FileParseError(name, "not in scalar format")
 
     def should_ignore(self, name):
+        """
+        Check if a name should be ignored according to self.ignores
+        """
         for pattern in self.ignores:
             if pattern.match(name):
                 return True
@@ -206,14 +213,15 @@ class Whizker:
                 if not self.should_ignore(name):
                     path = os.path.join(self.var_set_path, name)
                     if os.path.isfile(path):
+                        # Yield without .yaml
                         yield re.sub('\.%s$' % TEMPLATE_EXT, '', name)
         else:
-            raise FileNotFoundError(self.var_set_path, "variable set path")
+            raise ValueError("No variable set path to list from.")
 
     @property
     def render_pairs(self):
         """
-        Yield pairs of (template, destination file)
+        Yield pairs of (template file, destination file)
         """
         for root, subdirs, files in os.walk(self.templates_path):
 
@@ -230,7 +238,8 @@ class Whizker:
 
     def pre_render(self):
         """
-        Yield pairs of (destination file, what to write || FileRenderError)
+        Yield pairs of (destination file, what to write)
+        or if there is an error, (destination file, FileRenderError)
         """
         for template, dest in self.render_pairs:
             try:
@@ -253,6 +262,7 @@ class Whizker:
                     os.remove(dest)
                 except OSError:
                     pass
+
                 with make_dirs_and_open(dest) as f:
                     f.write(result)
                     logger.info("Successfully rendered \"%s\"" % dest)
@@ -274,11 +284,12 @@ class Whizker:
                             tofile='%s (rendered)' % dest)
                 except IOError:
                     yield [
-                        "=== No destination file \"%s\" for comparison.\n" %
-                        dest]
+                        "=== No destination file \"%s\" for comparison.\n"
+                        % dest]
 
 def parse_args():
     parser = ArgumentParser(description=description)
+
     parser.add_argument('-l',
                         help="""
                         list variable sets.
@@ -286,6 +297,7 @@ def parse_args():
                         dest='list_var_sets',
                         action='store_true',
                         default=False)
+
     parser.add_argument('-t',
                         help="""
                         template directory.
@@ -294,6 +306,7 @@ def parse_args():
                         dest='template_dir',
                         type=str,
                         default=WHIZKERS_TEMPLATES)
+
     parser.add_argument('-d',
                         help="""
                         destination directory.
@@ -302,6 +315,7 @@ def parse_args():
                         dest='dest_dir',
                         type=str,
                         default=HOME)
+
     parser.add_argument('-s',
                         help="""
                         variable set directory.
@@ -310,6 +324,7 @@ def parse_args():
                         dest='var_set_dir',
                         type=str,
                         default=WHIZKERS_VAR_SETS)
+
     parser.add_argument('-i',
                         help="""
                         ignores file.
@@ -318,6 +333,7 @@ def parse_args():
                         dest='ignores_file',
                         type=str,
                         default=WHIZKERS_IGNORES)
+
     parser.add_argument('-e',
                         help="""
                         whether or not to use environment variables.
@@ -326,6 +342,7 @@ def parse_args():
                         dest='env_vars',
                         action='store_true',
                         default=False)
+
     parser.add_argument('--diff',
                         help="""
                         show diff between template renderings and current
@@ -333,31 +350,36 @@ def parse_args():
                         """,
                         action='store_true',
                         default=False)
+
     parser.add_argument('variable_files',
                         help="additional variable files",
                         nargs='*',
                         type=str)
+
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
 
+    # Set up logging
     ch = logging.StreamHandler(stdout)
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(ColoredFormatter("%(log_color)s%(message)s"))
     logger.addHandler(ch)
 
+    # Defaults on files
     if args.list_var_sets:
         args.variable_files = []
     elif os.path.isfile(WHIZKERS_DEFAULTS):
         args.variable_files.insert(0, WHIZKERS_DEFAULTS)
     else:
-        logger.warn("Default variables file %s not found. Skipping..." %
-                    WHIZKERS_DEFAULTS)
+        logger.warn("Default variables file %s not found. Skipping..."
+                    % WHIZKERS_DEFAULTS)
 
     if not os.path.isfile(args.ignores_file):
-        logger.warn("Ignores file %s not found. Skipping..." % filename)
+        logger.warn("Ignores file %s not found. Skipping..."
+                    % args.ignores_file)
         args.ignores_file = None
 
     try:
@@ -373,194 +395,21 @@ def main():
         logger.critical(e)
         exit(1)
 
-#     # How to update variables - returns success
-#     def update_variables(variables, filename):
-#         with codecs.open(filename, 'r', 'utf-8') as f:
-#             try:
-#                 to_merge = yaml.load(f.read())
-#             except yaml.parser.ParserError:
-#                 cprint("\"%s\" could not be parsed." % filename, 'red')
-#                 return False
-#             else:
-#                 if isinstance(to_merge, dict):
-#                     variables.update(to_merge)
-#                     print("Using \"%s\"..." % filename)
-#                     return True
-#                 else:
-#                     cprint("\"%s\" was not in mapping format." %
-#                            filename, 'red')
-#                     return False
-
-#     # Read ignores file
-#     try:
-#         with codecs.open(args.ignores_file, 'r', 'utf-8') as f:
-#             to_merge = yaml.load(f.read())
-#         if isinstance(to_merge, list):
-#             ignores |= set(to_merge)
-#         else:
-#             cprint("\"%s\" was not in scalar format." %
-#                    args.ignores_file, 'red')
-#             errs = True
-#     except IOError:
-#         cprint("No ignores file found. Skipping...", 'yellow')
-
-#     # Pre-compile regexes
-#     ignores = [re.compile(i) for i in ignores]
-
-    # Did we request a listing of variable sets?
     if args.list_var_sets:
-        for var_set in whizker.var_sets:
-            print(var_set)
-
-#         # Does our folder exist?
-#         if os.path.exists(WHIZKERS_VAR_SETS):
-# 
-#             # Get all the paths...
-#             for name in os.listdir(WHIZKERS_VAR_SETS):
-#                 path = os.path.join(WHIZKERS_VAR_SETS, name)
-#                 if os.path.isfile(path):
-# 
-#                     # Check if we should ignore it
-#                     ignore = False
-# 
-#                     for pattern in ignores:
-#                         if pattern.match(name):
-#                             ignore = True
-#                             break
-# 
-#                     if not ignore:
-#                         print(re.sub('\.yaml$', '', name))
-#         else:
-#             cprint("Variable sets folder %s not found." % WHIZKERS_VAR_SETS,
-#                    'yellow')
-#         exit(0)
-
-#     # Use environment variables if requested
-#     if args.env_vars:
-#         print("Using environment variables...")
-#         variables.update(dict(os.environ))
-
-#     # Read the config
-#     try:
-#         errs |= not update_variables(variables, WHIZKERS_DEFAULTS)
-#     except IOError:
-#         cprint("No default variables file found. Skipping...", 'yellow')
-
-#     # Read additional files
-#     for name in args.variable_files:
-#         try:
-#             errs |= not update_variables(variables, name)
-#         except IOError:
-# 
-#             # Try opening just by name
-#             name = os.path.join(WHIZKERS_VAR_SETS, '%s.yaml' % name)
-#             try:
-#                 errs |= not update_variables(variables, name)
-#             except IOError:
-#                 cprint("Variable file %s not found." % name, 'red')
-#                 errs = True
-# 
-#     if not variables:
-#         cprint("No variables provided.", 'red')
-#         errs = True
-
-#     # Errors?
-#     if errs:
-#         cprint("\nErrors occurred - abort.", 'red')
-#         exit(1)
-# 
-#     # Exit code, in case one of the templates doesn't render
-#     exit_code = 0
+        try:
+            for var_set in whizker.var_sets:
+                print(var_set)
+        except ValueError as e:
+            logger.critical(e)
+            exit(1)
 
     elif args.diff:
         for diff in whizker.diff():
             for line in diff:
                 diff_print(line)
+
     else:
         whizker.render()
-
-#     # Loop through the templates
-#     for root, subdirs, files in os.walk(args.template_dir):
-# 
-#         # Substitute the template dir for home dir
-#         dest_root = re.sub('^%s' % args.template_dir,
-#                            args.dest_dir, root)
-# 
-#         # Iterate through templates
-#         for name in files:
-#             ignore = False
-# 
-#             # Check ignore list
-#             for pattern in ignores:
-#                 if pattern.match(name):
-#                     ignore = True
-#                     break
-# 
-#             if ignore:
-#                 continue
-# 
-#             template = os.path.join(root, name)
-#             dest_file = os.path.join(dest_root, name)
-# 
-#             # Make the directory
-#             if not os.path.exists(dest_root):
-#                 os.makedirs(dest_root)
-# 
-#             # Apply variables
-#             try:
-#                 with codecs.open(template, 'r', 'utf-8') as f:
-#                     applied = renderer.render(f.read(), variables)
-#             except KeyNotFoundError as e:
-#                 # Add a newline if we're doing diffs
-#                 if args.diff:
-#                     print('')
-#                 cprint("Render error in \"%s\":" % template, 'red')
-#                 cprint("    %s" % e, 'red')
-#                 exit_code = 1
-#             else:
-#                 if args.diff:
-#                     try:
-#                         with codecs.open(dest_file, 'r', 'utf-8') as f:
-#                             diff = unified_diff(
-#                                 f.readlines(), applied.splitlines(True),
-#                                 fromfile='%s (rendered)' % dest_file,
-#                                 tofile=dest_file)
-#                     # File missing
-#                     except IOError:
-#                         cprint(
-#                             '\nNo destination file \"%s\" for comparison.' %
-#                             dest_file, 'yellow')
-#                     else:
-#                         firstline = True
-#                         for line in diff:
-#                             if firstline:
-#                                 print('')
-#                                 firstline = False
-#                             line = line.rstrip('\n')
-#                             if re.match('^(---|\+\+\+|@@)', line):
-#                                 cprint(line.encode('utf-8'), attrs=['bold'])
-#                             elif re.match('^\+', line):
-#                                 cprint(line.encode('utf-8'), 'green')
-#                             elif re.match('^-', line):
-#                                 cprint(line.encode('utf-8'), 'red')
-#                             elif re.match('^\?', line):
-#                                 cprint(line.encode('utf-8'), 'yellow')
-#                             else:
-#                                 print(line.encode('utf-8'))
-# 
-#                 # Render
-#                 else:
-#                     # Delete any existing file first
-#                     try:
-#                         os.remove(dest_file)
-#                     except OSError:
-#                         pass
-# 
-#                     with codecs.open(dest_file, 'w', 'utf-8') as f:
-#                         f.write(applied)
-#                     cprint("Successfully rendered %s." % template, 'green')
-# 
-#     exit(exit_code)
 
 if __name__ == '__main__':
     main()
