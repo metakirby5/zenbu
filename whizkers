@@ -55,6 +55,200 @@ WHIZKERS_IGNORES = os.path.join(
     WHIZKERS_ROOT, 'ignores.yaml')
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
+TEMPLATE_EXT = 'yaml'
+
+
+def make_dirs_and_open(path):
+    if not os.path.exists(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path))
+    return codecs.open(path, 'w', 'utf-8')
+
+def diff_print(line):
+    if re.match('^(===|---|\+\+\+|@@)', line):
+        cprint(line.encode('utf-8'), attrs=['bold'])
+    elif re.match('^\+', line):
+        cprint(line.encode('utf-8'), 'green')
+    elif re.match('^-', line):
+        cprint(line.encode('utf-8'), 'red')
+    elif re.match('^\?', line):
+        cprint(line.encode('utf-8'), 'yellow')
+    else:
+        print(line.encode('utf-8'))
+
+class DetailException(Exception):
+    def __init__(self, message, path):
+        super(DetailError, self).__init__(message)
+        self.path = path
+
+
+class FileNotFoundError(Detai:
+        msg = "Was not found: \"%s\"" % self.path
+        if self.message:
+            msg += " (%s)" % self.message
+        return msg
+
+
+class FileParseError(DetailException):
+    def __str__(self):
+        msg = "Could not parse: \"%s\"" % self.path
+        if self.message:
+            msg += " (%s)" % self.message
+        return msg
+
+class RenderError(DetailException):
+    def __str__(self):
+        msg = "Could not render: \"%s\"" % self.path
+        if self.message:
+            msg += " (%s)" % self.message
+        return msg
+
+
+class Whizker:
+    def __init__(self,
+                 templates_path,
+                 dest_path,
+                 var_set_path=None,
+                 use_env_vars=False,
+                 variables=[],
+                 ignores=None):
+        self.variables = {}     # {variable: value}
+        self.ignores = set()    # Set of regexes
+
+        self.renderer = Renderer(
+            missing_tags=MissingTags.strict,    # Alert on missing vars
+            escape=lambda x: x,                 # Don't escape
+        )
+
+        if os.path.exists(templates_path):
+            self.templates_path = templates_path
+        else:
+            raise FileNotFoundException(path=templates_path)
+
+        if os.path.exists(dest_path):
+            self.dest_path = dest_path
+        else:
+            raise FileNotFoundException(path=dest_path)
+
+        if not var_set_path or os.path.exists(var_set_path):
+            self.var_set_path = var_set_path
+        else:
+            raise FileNotFoundException(path=var_set_path)
+
+        # Initial setup
+        if use_env_vars:
+            self.variables.update(dict(os.environ))
+        for name in variables:
+            self.add_variables(name)
+        if ignores:
+            self.add_ignores(ignores)
+
+    def add_variables(self, name):
+        # If it might be just a name...
+        if not os.path.isfile(name):
+            name = os.path.join(WHIZKERS_VAR_SETS, '%s.yaml' % name)
+
+        try:
+            with codecs.open(name, 'r', 'utf-8') as f:
+                to_merge = yaml.load(f.read())
+        except IOError:
+            raise FileNotFoundError(path=name)
+        except yaml.parser.ParserError:
+            raise FileParseError(path=name)
+        else:
+            if isinstance(to_merge, dict):
+                self.variables.update(to_merge)
+            else:
+                raise FileParseError("not in mapping format", path=name)
+
+    def add_ignores(self, filename):
+        try:
+            with codecs.open(filename, 'r', 'utf-8') as f:
+                to_merge = yaml.load(f.read())
+        except IOError:
+            raise FileNotFoundError(path=filename)
+        except yaml.parser.ParserError:
+            raise FileParseError(path=filename)
+        else:
+            if isinstance(to_merge, list):
+                self.ignores |= set(re.compile(i) for i in to_merge)
+            else:
+                raise FileParseError("not in scalar format", path=filename)
+
+    def should_ignore(self, name):
+        for pattern in self.ignores:
+            if pattern.match(name):
+                return True
+        return False
+
+    @property
+    def var_sets(self):
+        """
+        Yield the available variable sets
+        """
+        # Does our folder exist?
+        if self.var_set_path:
+
+            # Get all the paths...
+            for name in os.listdir(self.var_set_path):
+                if not self.should_ignore(name):
+                    path = os.path.join(self.var_set_path, name)
+                    if os.path.isfile(path):
+                        yield re.sub('\.%s$' % TEMPLATE_EXT, '', name)
+        else:
+            raise FileNotFoundError(path=self.var_set_path)
+
+    @property
+    def render_pairs(self):
+        """
+        Yield pairs of (template, destination file)
+        """
+        for root, subdirs, files in os.walk(self.templates_path):
+
+            # Substitute the template dir for home dir
+            dest_root = re.sub('^%s' % self.templates_path,
+                               self.dest_path, root)
+
+            # Iterate through templates
+            for name in files:
+                if not self.should_ignore(name):
+                    template = os.path.join(root, name)
+                    dest = os.path.join(dest_root, name)
+                    yield (template, dest)
+
+    def pre_render(self):
+        """
+        Yield pairs of (destination file, what to write)
+        """
+        for template, dest in self.render_pairs:
+            try:
+                with codecs.open(template, 'r', 'utf-8') as f:
+                    yield (dest, self.renderer.render(
+                        f.read(), self.variables))
+            except KeyNotFoundError as e:
+                raise RenderError(e.message, path=template)
+
+    def render(self):
+        for dest, applied in self.pre_render():
+            # Delete any existing file first
+            try:
+                os.remove(dest)
+            except OSError:
+                pass
+
+            with make_dirs_and_open(dest) as f:
+                f.write(applied)
+
+    def diff(self):
+        for dest, applied in self.pre_render():
+            try:
+                with codecs.open(dest, 'r', 'utf-8') as f:
+                    yield unified_diff(
+                        f.readlines(), applied.splitlines(True),
+                        fromfile='%s (rendered)' % dest_file,
+                        tofile=dest_file)
+            except IOError:
+                yield ["=== No destination file \"%s\" for comparison.\n" %
+                       dest]
 
 def parse_args():
     parser = ArgumentParser(description=description)
