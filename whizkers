@@ -160,7 +160,7 @@ class Whizker:
 
     def add_variables(self, name):
         # If it might be just a name...
-        if self.var_set_path and not os.path.isfile(name):
+        if self.var_set_path and not os.path.exists(name):
             name = os.path.join(self.var_set_path, '%s.yaml' % name)
 
         try:
