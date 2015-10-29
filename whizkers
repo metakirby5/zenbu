@@ -17,7 +17,7 @@ to render into your home directory (by default).
 Additional variable files can be applied
 by supplying them as arguments, in order of application.
 
-They can either be paths or, if located in
+They can either be paths or, if located in (by default)
 ~/.config/whizkers/variable_sets/,
 extension-less filenames.
 
@@ -134,17 +134,17 @@ class Whizker:
         if os.path.exists(templates_path):
             self.templates_path = templates_path
         else:
-            raise FileNotFoundError(templates_path, "Templates path")
+            raise FileNotFoundError(templates_path, "templates path")
 
         if os.path.exists(dest_path):
             self.dest_path = dest_path
         else:
-            raise FileNotFoundError(dest_path, "Destination path")
+            raise FileNotFoundError(dest_path, "destination path")
 
         if not var_set_path or os.path.exists(var_set_path):
             self.var_set_path = var_set_path
         else:
-            raise FileNotFoundError(var_set_path, "Variable set path")
+            raise FileNotFoundError(var_set_path, "variable set path")
 
         # Initial setup
         if use_env_vars:
@@ -156,16 +156,16 @@ class Whizker:
 
     def add_variables(self, name):
         # If it might be just a name...
-        if not os.path.isfile(name):
-            name = os.path.join(WHIZKERS_VAR_SETS, '%s.yaml' % name)
+        if self.var_set_path and not os.path.isfile(name):
+            name = os.path.join(self.var_set_path, '%s.yaml' % name)
 
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
                 to_merge = yaml.load(f.read())
         except IOError:
-            raise FileNotFoundError(name)
+            raise FileNotFoundError(name, "variables file")
         except yaml.parser.ParserError as e:
-            raise FileParseError(e, name)
+            raise FileParseError(name, e)
         else:
             if isinstance(to_merge, dict):
                 logger.info("Using \"%s\"..." % name)
@@ -178,7 +178,7 @@ class Whizker:
             with codecs.open(name, 'r', 'utf-8') as f:
                 to_merge = yaml.load(f.read())
         except IOError:
-            raise FileNotFoundError(name)
+            raise FileNotFoundError(name, "ignores file")
         except yaml.parser.ParserError as e:
             raise FileParseError(e, name)
         else:
@@ -208,7 +208,7 @@ class Whizker:
                     if os.path.isfile(path):
                         yield re.sub('\.%s$' % TEMPLATE_EXT, '', name)
         else:
-            raise FileNotFoundError(self.var_set_path)
+            raise FileNotFoundError(self.var_set_path, "variable set path")
 
     @property
     def render_pairs(self):
@@ -230,8 +230,7 @@ class Whizker:
 
     def pre_render(self):
         """
-        Yield pairs of (destination file, what to write)
-        Logs any templates that cannot be rendered
+        Yield pairs of (destination file, what to write || FileRenderError)
         """
         for template, dest in self.render_pairs:
             try:
@@ -239,32 +238,44 @@ class Whizker:
                     yield (dest, self.renderer.render(
                         f.read(), self.variables))
             except KeyNotFoundError as e:
-                logger.error(FileRenderError(template, e))
+                yield (dest, FileRenderError(template, e))
 
     def render(self):
-        for dest, applied in self.pre_render():
-            # Delete any existing file first
-            try:
-                os.remove(dest)
-            except OSError:
-                pass
-            with make_dirs_and_open(dest) as f:
-                f.write(applied)
-                logger.info("Successfully rendered \"%s\"" % dest)
+        """
+        Only logs in the case of file render errors.
+        """
+        for dest, result in self.pre_render():
+            if isinstance(result, FileRenderError):
+                logger.error(result)
+            else:
+                # Delete any existing file first
+                try:
+                    os.remove(dest)
+                except OSError:
+                    pass
+                with make_dirs_and_open(dest) as f:
+                    f.write(result)
+                    logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
-        for dest, applied in self.pre_render():
-            try:
-                with codecs.open(dest, 'r', 'utf-8') as f:
-                    yield unified_diff(
-                        applied.splitlines(True),
-                        f.readlines(),
-                        fromfile=dest,
-                        tofile='%s (rendered)' % dest)
-            except IOError:
-                yield [
-                    "=== No destination file \"%s\" for comparison.\n" %
-                    dest]
+        """
+        Only logs in the case of file render errors.
+        """
+        for dest, result in self.pre_render():
+            if isinstance(result, FileRenderError):
+                logger.error(result)
+            else:
+                try:
+                    with codecs.open(dest, 'r', 'utf-8') as f:
+                        yield unified_diff(
+                            result.splitlines(True),
+                            f.readlines(),
+                            fromfile=dest,
+                            tofile='%s (rendered)' % dest)
+                except IOError:
+                    yield [
+                        "=== No destination file \"%s\" for comparison.\n" %
+                        dest]
 
 def parse_args():
     parser = ArgumentParser(description=description)
@@ -291,6 +302,14 @@ def parse_args():
                         dest='dest_dir',
                         type=str,
                         default=HOME)
+    parser.add_argument('-s',
+                        help="""
+                        variable set directory.
+                        Default: %s
+                        """ % WHIZKERS_VAR_SETS,
+                        dest='var_set_dir',
+                        type=str,
+                        default=WHIZKERS_VAR_SETS)
     parser.add_argument('-i',
                         help="""
                         ignores file.
@@ -329,7 +348,9 @@ def main():
     ch.setFormatter(ColoredFormatter("%(log_color)s%(message)s"))
     logger.addHandler(ch)
 
-    if os.path.isfile(WHIZKERS_DEFAULTS):
+    if args.list_var_sets:
+        args.variable_files = []
+    elif os.path.isfile(WHIZKERS_DEFAULTS):
         args.variable_files.insert(0, WHIZKERS_DEFAULTS)
     else:
         logger.warn("Default variables file %s not found. Skipping..." %
@@ -343,12 +364,12 @@ def main():
         whizker = Whizker(
             args.template_dir,
             args.dest_dir,
-            WHIZKERS_VAR_SETS,
+            args.var_set_dir,
             args.env_vars,
             args.variable_files,
             args.ignores_file
         )
-    except FileNotFoundError as e:
+    except (FileNotFoundError, FileParseError) as e:
         logger.critical(e)
         exit(1)
 
