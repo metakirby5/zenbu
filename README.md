@@ -5,6 +5,7 @@ Pystache + YAML based config templater.
 - pystache
 - PyYAML
 - termcolor
+- colorlog
 
 # Usage
 ```
