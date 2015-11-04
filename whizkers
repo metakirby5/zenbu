@@ -45,8 +45,9 @@ import re
 import argcomplete
 from sys import exit, stdout
 from difflib import unified_diff
+from pydoc import pipepager # Dangerously undocumented...
 from argparse import ArgumentParser
-from termcolor import cprint
+from termcolor import colored
 from colorlog import ColoredFormatter
 from pystache.renderer import Renderer
 from pystache.common import MissingTags
@@ -108,18 +109,17 @@ def make_dirs_and_open(path):
         os.makedirs(os.path.dirname(path))
     return codecs.open(path, 'w', 'utf-8')
 
-def diff_print(line):
-    line = line.rstrip('\n')
+def diff_colorify(line):
     if re.match('^(===|---|\+\+\+|@@)', line):
-        cprint(line.encode('utf-8'), attrs=['bold'])
+        return colored(line.encode('utf-8'), attrs=['bold'])
     elif re.match('^\+', line):
-        cprint(line.encode('utf-8'), 'green')
+        return colored(line.encode('utf-8'), 'green')
     elif re.match('^-', line):
-        cprint(line.encode('utf-8'), 'red')
+        return colored(line.encode('utf-8'), 'red')
     elif re.match('^\?', line):
-        cprint(line.encode('utf-8'), 'yellow')
+        return colored(line.encode('utf-8'), 'yellow')
     else:
-        print(line.encode('utf-8'))
+        return line.encode('utf-8')
 
 
 # Exceptions
@@ -442,9 +442,14 @@ def main():
             exit(1)
 
     elif args.diff:
-        for diff in whizker.diff():
-            for line in diff:
-                diff_print(line)
+        pipepager(
+            ''.join(
+                ''.join(
+                    diff_colorify(line) for line in diff
+                ) for diff in whizker.diff()
+            ),
+            cmd='less -R',
+        )
 
     else:
         whizker.render()
