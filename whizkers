@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# PYTHON_ARGCOMPLETE_OK
 
 description = """
 A pystache + YAML based config templater.
@@ -27,7 +28,10 @@ simply put the name of the variable in mustache brackets.
 Order of precedence is:
 last YAML variable defined >
 first YAML variable defined >
-environment variables
+environment variables.
+
+Autocomplete support available, but only for the default
+variable set directory.
 
 Finally, diffs between the current destination files and
 template renderings are available via command-line flag.
@@ -38,6 +42,7 @@ import os
 import codecs
 import yaml
 import re
+import argcomplete
 from sys import exit, stdout
 from difflib import unified_diff
 from argparse import ArgumentParser
@@ -69,6 +74,33 @@ TEMPLATE_EXT = 'yaml'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())
+
+# Autocomplete
+def variable_set_completer(prefix, **kwargs):
+    # Use dummy template and dest directory
+    # TODO: make this less janky
+    DUMMY = '/tmp/'
+    try:
+        var_sets = Whizker(
+            DUMMY,
+            DUMMY,
+            WHIZKERS_VAR_SETS,
+            ignores=WHIZKERS_IGNORES,
+        ).var_sets
+    except FileNotFoundError as e:
+        # Try again with no ignores file
+        try:
+            var_sets = Whizker(
+                DUMMY,
+                DUMMY,
+                WHIZKERS_VAR_SETS,
+            ).var_sets
+        except FileNotFoundError as e:
+            argcomplete.warn(e)
+    except FileParseError as e:
+        argcomplete.warn(e)
+    else:
+        return (v for v in var_sets if v.startswith(prefix))
 
 # Convenience functions
 def make_dirs_and_open(path):
@@ -359,8 +391,9 @@ def parse_args():
     parser.add_argument('variable_files',
                         help="additional variable files",
                         nargs='*',
-                        type=str)
+                        type=str).completer = variable_set_completer
 
+    argcomplete.autocomplete(parser, always_complete_options=False)
     return parser.parse_args()
 
 
