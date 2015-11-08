@@ -144,9 +144,21 @@ class FileParseError(PathException):
             msg += "\n    (%s)" % self.message
         return msg
 
+
 class FileRenderError(PathException):
     def __str__(self):
         msg = "Could not render: \"%s\"" % self.path
+        if self.message:
+            msg += "\n    (%s)" % self.message
+        return msg
+
+
+class VariableRenderError(Exception):
+    def __init__(self, variable_name, message=None):
+        super(VariableRenderError, self).__init__(message)
+        self.variable_name = variable_name
+    def __str__(self):
+        msg = "Could not render variable: \"%s\"" % self.variable_name
         if self.message:
             msg += "\n    (%s)" % self.message
         return msg
@@ -163,8 +175,10 @@ class Whizker:
                  use_env_vars=False,
                  variables=[],
                  ignores=None):
-        self.variables = {}     # {variable: value}
-        self.ignores = set()    # Set of regexes
+        self.variables = {}             # {variable: value}
+        self.ignores = set()            # Set of regexes
+        self.variables_rendered = False # Whether or not variables have been
+                                        # shallowly rendered
 
         self.renderer = Renderer(
             missing_tags=MissingTags.strict,    # Alert on missing vars
@@ -213,6 +227,21 @@ class Whizker:
                 self.variables.update(to_merge)
             else:
                 raise FileParseError(name, "not in mapping format")
+
+    def render_variables(self):
+        """
+        Shallowly resolves variables within variables.
+        """
+        rendered_variables = {}
+        for k, v in self.variables.iteritems():
+            if isinstance(v, str):
+                try:
+                    rendered_variables[k] = self.renderer.render(
+                        v, self.variables)
+                except KeyNotFoundError as e:
+                    logger.error(VariableRenderError(k, e))
+        self.variables.update(rendered_variables)
+        self.variables_rendered = True
 
     def add_ignores(self, name):
         try:
@@ -273,24 +302,27 @@ class Whizker:
                     dest = os.path.join(dest_root, name)
                     yield (template, dest)
 
-    def pre_render(self):
+    def render(self):
         """
-        Yield pairs of (destination file, what to write)
-        or if there is an error, (destination file, FileRenderError)
+        Yield tuples of (destination file, mode, what to write)
+        or if there is an error, (destination file, mode, FileRenderError)
         """
+        if not self.variables_rendered:
+            self.render_variables()
         for template, dest in self.render_pairs:
             try:
                 with codecs.open(template, 'r', 'utf-8') as f:
-                    yield (dest, self.renderer.render(
-                        f.read(), self.variables))
+                    yield (dest, os.stat(template).st_mode,
+                           self.renderer.render(f.read(), self.variables))
             except KeyNotFoundError as e:
-                yield (dest, FileRenderError(template, e))
+                yield (dest, os.stat(template).st_mode,
+                       FileRenderError(template, e))
 
-    def render(self):
+    def render_and_write(self):
         """
         Only logs in the case of file render errors.
         """
-        for dest, result in self.pre_render():
+        for dest, mode, result in self.render():
             if isinstance(result, FileRenderError):
                 logger.error(result)
             else:
@@ -302,13 +334,14 @@ class Whizker:
 
                 with make_dirs_and_open(dest) as f:
                     f.write(result)
+                    os.chmod(dest, mode)
                     logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
         """
         Only logs in the case of file render errors.
         """
-        for dest, result in self.pre_render():
+        for dest, mode, result in self.render():
             if isinstance(result, FileRenderError):
                 logger.error(result)
             else:
@@ -452,7 +485,7 @@ def main():
         )
 
     else:
-        whizker.render()
+        whizker.render_and_write()
 
 if __name__ == '__main__':
     main()
