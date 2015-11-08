@@ -32,10 +32,10 @@ either be paths or, if located in (by default)
 ~/.config/whizkers/variable_sets/, extension-less filenames. Environment
 variable support is available; simply put the name of the variable in mustache
 brackets. Order of precedence is: last YAML variable defined > first YAML
-variable defined > environment variables. Autocomplete support available, but
-only for the default variable set directory. Finally, diffs between the
-current destination files and template renderings are available via command-
-line flag.
+variable defined > environment variables. Variables are shallowly resolved
+once. Autocomplete support available, but only for the default variable set
+directory. Finally, diffs between the current destination files and template
+renderings are available via command-line flag.
 
 positional arguments:
   variable_files   additional variable files

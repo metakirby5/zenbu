@@ -30,6 +30,8 @@ last YAML variable defined >
 first YAML variable defined >
 environment variables.
 
+Variables are shallowly resolved once.
+
 Autocomplete support available, but only for the default
 variable set directory.
 
