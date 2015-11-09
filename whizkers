@@ -30,7 +30,8 @@ last YAML variable defined >
 first YAML variable defined >
 environment variables.
 
-Variables are shallowly resolved once.
+Variables are shallowly resolved once, then anything in
+{`...`} is eval'd.
 
 Autocomplete support available, but only for the default
 variable set directory.
@@ -112,13 +113,13 @@ def make_dirs_and_open(path):
     return codecs.open(path, 'w', 'utf-8')
 
 def diff_colorify(line):
-    if re.match('^(===|---|\+\+\+|@@)', line):
+    if re.match(r'^(===|---|\+\+\+|@@)', line):
         return colored(line.encode('utf-8'), attrs=['bold'])
-    elif re.match('^\+', line):
+    elif re.match(r'^\+', line):
         return colored(line.encode('utf-8'), 'green')
-    elif re.match('^-', line):
+    elif re.match(r'^-', line):
         return colored(line.encode('utf-8'), 'red')
-    elif re.match('^\?', line):
+    elif re.match(r'^\?', line):
         return colored(line.encode('utf-8'), 'yellow')
     else:
         return line.encode('utf-8')
@@ -232,16 +233,25 @@ class Whizker:
 
     def render_variables(self):
         """
-        Shallowly resolves variables within variables.
+        Shallowly resolves variables within variables, then evals
+        content in {`...`}
         """
         rendered_variables = {}
         for k, v in self.variables.iteritems():
             if isinstance(v, str):
                 try:
-                    rendered_variables[k] = self.renderer.render(
-                        v, self.variables)
+                    v = self.renderer.render(v, self.variables)
                 except KeyNotFoundError as e:
                     logger.error(VariableRenderError(k, e))
+
+                # Eval {`...`}
+                for expr in re.findall(r'{`.*`}', v):
+                    try:
+                        v = v.replace(expr, str(eval(expr[2:-2])))
+                    except Exception as e:
+                        logger.error(VariableRenderError(k, e))
+
+                rendered_variables[k] = v
         self.variables.update(rendered_variables)
         self.variables_rendered = True
 
@@ -282,7 +292,7 @@ class Whizker:
                     path = os.path.join(self.var_set_path, name)
                     if os.path.isfile(path):
                         # Yield without .yaml
-                        yield re.sub('\.%s$' % TEMPLATE_EXT, '', name)
+                        yield re.sub(r'\.%s$' % TEMPLATE_EXT, '', name)
         else:
             raise ValueError("No variable set path to list from.")
 
@@ -294,7 +304,7 @@ class Whizker:
         for root, subdirs, files in os.walk(self.templates_path):
 
             # Substitute the template dir for home dir
-            dest_root = re.sub('^%s' % self.templates_path,
+            dest_root = re.sub(r'^%s' % self.templates_path,
                                self.dest_path, root)
 
             # Iterate through templates
@@ -306,8 +316,8 @@ class Whizker:
 
     def render(self):
         """
-        Yield tuples of (destination file, mode, what to write)
-        or if there is an error, (destination file, mode, FileRenderError)
+        Yield tuples of (destination file, mode, what to write).
+        If there is a file render error, log it.
         """
         if not self.variables_rendered:
             self.render_variables()
@@ -317,47 +327,34 @@ class Whizker:
                     yield (dest, os.stat(template).st_mode,
                            self.renderer.render(f.read(), self.variables))
             except KeyNotFoundError as e:
-                yield (dest, os.stat(template).st_mode,
-                       FileRenderError(template, e))
+                logger.error(FileRenderError(template, e))
 
     def render_and_write(self):
-        """
-        Only logs in the case of file render errors.
-        """
         for dest, mode, result in self.render():
-            if isinstance(result, FileRenderError):
-                logger.error(result)
-            else:
-                # Delete any existing file first
-                try:
-                    os.remove(dest)
-                except OSError:
-                    pass
+            # Delete any existing file first
+            try:
+                os.remove(dest)
+            except OSError:
+                pass
 
-                with make_dirs_and_open(dest) as f:
-                    f.write(result)
-                    os.chmod(dest, mode)
-                    logger.info("Successfully rendered \"%s\"" % dest)
+            with make_dirs_and_open(dest) as f:
+                f.write(result)
+                os.chmod(dest, mode)
+                logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
-        """
-        Only logs in the case of file render errors.
-        """
         for dest, mode, result in self.render():
-            if isinstance(result, FileRenderError):
-                logger.error(result)
-            else:
-                try:
-                    with codecs.open(dest, 'r', 'utf-8') as f:
-                        yield unified_diff(
-                            result.splitlines(True),
-                            f.readlines(),
-                            fromfile=dest,
-                            tofile='%s (rendered)' % dest)
-                except IOError:
-                    yield [
-                        "=== No destination file \"%s\" for comparison.\n"
-                        % dest]
+            try:
+                with codecs.open(dest, 'r', 'utf-8') as f:
+                    yield unified_diff(
+                        result.splitlines(True),
+                        f.readlines(),
+                        fromfile=dest,
+                        tofile='%s (rendered)' % dest)
+            except IOError:
+                yield [
+                    "=== No destination file \"%s\" for comparison.\n"
+                    % dest]
 
 def parse_args():
     parser = ArgumentParser(description=description)
@@ -423,6 +420,13 @@ def parse_args():
                         action='store_true',
                         default=False)
 
+    parser.add_argument('--dry',
+                        help="""
+                        do a dry run
+                        """,
+                        action='store_true',
+                        default=False)
+
     parser.add_argument('variable_files',
                         help="additional variable files",
                         nargs='*',
@@ -475,6 +479,11 @@ def main():
         except ValueError as e:
             logger.critical(e)
             exit(1)
+
+    elif args.dry:
+        logger.warning("Commencing dry run...")
+        for dest, mode, result in whizker.render():
+            logger.info("Successfully dry rendered \"%s\"" % dest)
 
     elif args.diff:
         pipepager(

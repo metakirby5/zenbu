@@ -19,7 +19,7 @@ sudo activate-global-python-argcomplete
 # Usage
 ```
 usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
-                [-i IGNORES_FILE] [-e] [--diff]
+                [-i IGNORES_FILE] [-e] [--diff] [--dry]
                 [variable_files [variable_files ...]]
 
 A pystache + YAML based config templater. Searches for an optional yaml file
@@ -33,9 +33,10 @@ either be paths or, if located in (by default)
 variable support is available; simply put the name of the variable in mustache
 brackets. Order of precedence is: last YAML variable defined > first YAML
 variable defined > environment variables. Variables are shallowly resolved
-once. Autocomplete support available, but only for the default variable set
-directory. Finally, diffs between the current destination files and template
-renderings are available via command-line flag.
+once, then anything in {`...`} is eval'd. Autocomplete support available, but
+only for the default variable set directory. Finally, diffs between the
+current destination files and template renderings are available via command-
+line flag.
 
 positional arguments:
   variable_files   additional variable files
@@ -54,6 +55,7 @@ optional arguments:
                    use environment variables
   --diff           show diff between template renderings and current
                    destination files
+  --dry            do a dry run
 ```
 
 # Thanks to
