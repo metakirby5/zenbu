@@ -328,6 +328,8 @@ class Whizker:
                            self.renderer.render(f.read(), self.variables))
             except KeyNotFoundError as e:
                 logger.error(FileRenderError(template, e))
+            except IOError as e:
+                logger.error(FileNotFoundError(template, e))
 
     def render_and_write(self):
         for dest, mode, result in self.render():
