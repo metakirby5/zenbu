@@ -36,8 +36,13 @@ Variables are shallowly resolved once, then anything in
 Autocomplete support available, but only for the default
 variable set directory.
 
-Finally, diffs between the current destination files and
-template renderings are available via command-line flag.
+A file watcher is available via the -w flag.
+Whenever a variable file in use, the ignores file,
+or a template file changes, the templates are rendered
+if there are any differences.
+
+Diffs between the current destination files and
+template renderings are available via the --diff flag.
 """
 
 import logging
@@ -47,6 +52,8 @@ import yaml
 import re
 import argcomplete
 from sys import exit, stdout
+from subprocess import call
+from time import sleep
 from difflib import unified_diff
 from pydoc import pipepager # Dangerously undocumented...
 from argparse import ArgumentParser
@@ -55,6 +62,8 @@ from colorlog import ColoredFormatter
 from pystache.renderer import Renderer
 from pystache.common import MissingTags
 from pystache.context import KeyNotFoundError
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
 # Constants
@@ -167,6 +176,15 @@ class VariableRenderError(Exception):
         return msg
 
 
+# Handler for all events
+class AllEventsHandler(FileSystemEventHandler):
+    def __init__(self, callback):
+        self.callback = callback
+
+    def on_any_event(self, event):
+        self.callback(event)
+
+
 class Whizker:
     """
     A template manager.
@@ -177,20 +195,24 @@ class Whizker:
                  var_set_path=None,
                  use_env_vars=False,
                  variables=[],
-                 ignores=None):
-        self.variables = {}             # {variable: value}
-        self.ignores = set()            # Set of regexes
-        self.variables_rendered = False # Whether or not variables have been
-                                        # shallowly rendered
+                 ignores=None,
+                 watch_command=None):
+
+        self.init_params = locals()             # Save locals for later
+        self.watch_paths = set()                # List of paths to watch
 
         self.renderer = Renderer(
             missing_tags=MissingTags.strict,    # Alert on missing vars
             escape=lambda x: x,                 # Don't escape
         )
 
+        self.observer = Observer()
+        self.watch_command = watch_command
+
         # Check paths
         if os.path.exists(templates_path):
             self.templates_path = templates_path
+            self.watch_paths.add(templates_path)
         else:
             raise FileNotFoundError(templates_path, "templates path")
 
@@ -205,12 +227,20 @@ class Whizker:
             raise FileNotFoundError(var_set_path, "variable set path")
 
         # Initial setup
-        if use_env_vars:
+        self.refresh_variables()
+
+    def refresh_variables(self):
+        self.variables = {}             # {variable: value}
+        self.ignores = set()            # Set of regexes
+        self.variables_rendered = False # Whether or not variables have been
+                                        # shallowly rendered
+
+        if self.init_params['use_env_vars']:
             self.variables.update(dict(os.environ))
-        for name in variables:
+        for name in self.init_params['variables']:
             self.add_variables(name)
-        if ignores:
-            self.add_ignores(ignores)
+        if self.init_params['ignores']:
+            self.add_ignores(self.init_params['ignores'])
 
     def add_variables(self, name):
         # If it might be just a name...
@@ -225,6 +255,7 @@ class Whizker:
         except yaml.parser.ParserError as e:
             raise FileParseError(name, e)
         else:
+            self.watch_paths.add(name)
             if isinstance(to_merge, dict):
                 logger.info("Using \"%s\"..." % name)
                 self.variables.update(to_merge)
@@ -264,6 +295,7 @@ class Whizker:
         except yaml.parser.ParserError as e:
             raise FileParseError(e, name)
         else:
+            self.watch_paths.add(name)
             if isinstance(to_merge, list):
                 self.ignores |= set(re.compile(i) for i in to_merge)
             else:
@@ -358,6 +390,54 @@ class Whizker:
                     "=== No destination file \"%s\" for comparison.\n"
                     % dest]
 
+    def watch(self):
+        def make_handler(file_to_watch=None):
+            def refresh_and_render(event):
+                # If we have a specific file, check for it
+                if file_to_watch:
+                    # If the file is gone, skip
+                    if not os.path.exists(event.src_path):
+                        return
+                    # If we don't care about the file, skip
+                    if not os.path.samefile(file_to_watch, event.src_path):
+                        return
+
+                logger.info("Change detected: %s" % event.src_path)
+                logger.info("Re-rendering...")
+                self.refresh_variables()
+                self.render_and_write()
+
+                # Execute watch command
+                if self.watch_command:
+                    logger.info("Executing watch command: %s" %
+                                self.watch_command)
+                    call(self.watch_command, shell=True)
+            return AllEventsHandler(refresh_and_render)
+
+        dir_handler = make_handler()
+
+        for path in self.watch_paths:
+            if os.path.isdir(path):
+                self.observer.schedule(
+                    dir_handler,
+                    path,
+                    recursive=True)
+            else:
+                # Watch the parent directory for the file pattern
+                self.observer.schedule(
+                    make_handler(path),
+                    os.path.dirname(path),
+                    recursive=False)
+
+        self.observer.start()
+
+    def stop_watch(self):
+        self.observer.stop()
+
+    def join_watch(self):
+        self.observer.join()
+
+
 def parse_args():
     parser = ArgumentParser(description=description)
 
@@ -414,6 +494,22 @@ def parse_args():
                         action='store_true',
                         default=False)
 
+    parser.add_argument('-w',
+                        help="""
+                        start file watcher.
+                        """,
+                        dest='watch',
+                        action='store_true',
+                        default=False)
+
+    parser.add_argument('--watch-command',
+                        help="""
+                        what to execute when a change occurs.
+                        Default: Nothing
+                        """,
+                        type=str,
+                        default='')
+
     parser.add_argument('--diff',
                         help="""
                         show diff between template renderings and current
@@ -436,7 +532,6 @@ def parse_args():
 
     argcomplete.autocomplete(parser, always_complete_options=False)
     return parser.parse_args()
-
 
 def main():
     args = parse_args()
@@ -468,7 +563,8 @@ def main():
             args.var_set_dir,
             args.env_vars,
             args.variable_files,
-            args.ignores_file
+            args.ignores_file,
+            args.watch_command
         )
     except (FileNotFoundError, FileParseError) as e:
         logger.critical(e)
@@ -482,11 +578,6 @@ def main():
             logger.critical(e)
             exit(1)
 
-    elif args.dry:
-        logger.warning("Commencing dry run...")
-        for dest, mode, result in whizker.render():
-            logger.info("Successfully dry rendered \"%s\"" % dest)
-
     elif args.diff:
         pipepager(
             ''.join(
@@ -496,6 +587,21 @@ def main():
             ),
             cmd='less -R',
         )
+
+    elif args.dry:
+        logger.warning("Commencing dry run...")
+        for dest, mode, result in whizker.render():
+            logger.info("Successfully dry rendered \"%s\"" % dest)
+
+    elif args.watch:
+        logger.info("Starting watch...")
+        whizker.watch()
+        try:
+            while True:
+                sleep(1)
+        except KeyboardInterrupt:
+            whizker.stop_watch()
+        whizker.join_watch()
 
     else:
         whizker.render_and_write()

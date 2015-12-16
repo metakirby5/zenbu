@@ -7,6 +7,7 @@ Pystache + YAML based config templater.
 - Python 2
 - pystache
 - PyYAML
+- watchdog
 - termcolor
 - colorlog
 - argcomplete
@@ -19,7 +20,8 @@ sudo activate-global-python-argcomplete
 # Usage
 ```
 usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
-                [-i IGNORES_FILE] [-e] [--diff] [--dry]
+                [-i IGNORES_FILE] [-e] [-w] [--watch-command WATCH_COMMAND]
+                [--diff] [--dry]
                 [variable_files [variable_files ...]]
 
 A pystache + YAML based config templater. Searches for an optional yaml file
@@ -34,28 +36,33 @@ variable support is available; simply put the name of the variable in mustache
 brackets. Order of precedence is: last YAML variable defined > first YAML
 variable defined > environment variables. Variables are shallowly resolved
 once, then anything in {`...`} is eval'd. Autocomplete support available, but
-only for the default variable set directory. Finally, diffs between the
-current destination files and template renderings are available via command-
-line flag.
+only for the default variable set directory. A file watcher is available via
+the -w flag. Whenever a variable file in use, the ignores file, or a template
+file changes, the templates are rendered if there are any differences. Diffs
+between the current destination files and template renderings are available
+via the --diff flag.
 
 positional arguments:
-  variable_files   additional variable files
+  variable_files        additional variable files
 
 optional arguments:
-  -h, --help       show this help message and exit
-  -l               list variable sets.
-  -t TEMPLATE_DIR  template directory. Default:
-                   /home/echan/.config/whizkers/templates
-  -d DEST_DIR      destination directory. Default: /home/echan
-  -s VAR_SET_DIR   variable set directory. Default:
-                   /home/echan/.config/whizkers/variable_sets
-  -i IGNORES_FILE  ignores file. Default:
-                   /home/echan/.config/whizkers/ignores.yaml
-  -e               whether or not to use environment variables. Default: don't
-                   use environment variables
-  --diff           show diff between template renderings and current
-                   destination files
-  --dry            do a dry run
+  -h, --help            show this help message and exit
+  -l                    list variable sets.
+  -t TEMPLATE_DIR       template directory. Default:
+                        /home/echan/.config/whizkers/templates
+  -d DEST_DIR           destination directory. Default: /home/echan
+  -s VAR_SET_DIR        variable set directory. Default:
+                        /home/echan/.config/whizkers/variable_sets
+  -i IGNORES_FILE       ignores file. Default:
+                        /home/echan/.config/whizkers/ignores.yaml
+  -e                    whether or not to use environment variables. Default:
+                        don't use environment variables
+  -w                    start file watcher.
+  --watch-command WATCH_COMMAND
+                        what to execute when a change occurs. Default: Nothing
+  --diff                show diff between template renderings and current
+                        destination files
+  --dry                 do a dry run
 ```
 
 # Thanks to
