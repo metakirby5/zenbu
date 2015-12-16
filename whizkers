@@ -53,6 +53,7 @@ import re
 import argcomplete
 from sys import exit, stdout
 from subprocess import call
+from threading import Timer
 from time import sleep
 from difflib import unified_diff
 from pydoc import pipepager # Dangerously undocumented...
@@ -82,6 +83,7 @@ WHIZKERS_IGNORES = os.path.join(
 WHIZKERS_TEMPLATES = os.path.join(
     WHIZKERS_ROOT, 'templates')
 TEMPLATE_EXT = 'yaml'
+WATCH_TIMEOUT = 0.5
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -174,6 +176,11 @@ class VariableRenderError(Exception):
         if self.message:
             msg += "\n    (%s)" % self.message
         return msg
+
+
+# Utility scope class
+class Scope(object):
+    pass
 
 
 # Handler for all events
@@ -391,28 +398,52 @@ class Whizker:
                     % dest]
 
     def watch(self):
-        def make_handler(file_to_watch=None):
-            def refresh_and_render(event):
-                # If we have a specific file, check for it
-                if file_to_watch:
-                    # If the file is gone, skip
-                    if not os.path.exists(event.src_path):
-                        return
-                    # If we don't care about the file, skip
-                    if not os.path.samefile(file_to_watch, event.src_path):
-                        return
+        # Because of read-only closures
+        scope = Scope()
+        scope.timer = None
 
-                logger.info("Change detected: %s" % event.src_path)
-                logger.info("Re-rendering...")
+        def make_handler(file_to_watch=None):
+            def rerender():
+                logger.info("\nRe-rendering...")
                 self.refresh_variables()
                 self.render_and_write()
 
                 # Execute watch command
                 if self.watch_command:
-                    logger.info("Executing watch command: %s" %
+                    logger.info("\nExecuting watch command: %s" %
                                 self.watch_command)
                     call(self.watch_command, shell=True)
-            return AllEventsHandler(refresh_and_render)
+
+            def schedule_rerender(event):
+                # If we have a specific file, check for it
+                if file_to_watch:
+                    # If the file is gone, skip
+                    if not os.path.exists(file_to_watch) or \
+                            not os.path.exists(event.src_path):
+                        return
+                    # If we don't care about the file, skip
+                    if not os.path.samefile(file_to_watch, event.src_path):
+                        return
+
+                # If it's a directory, skip
+                if event.is_directory:
+                    return
+
+                # If we should ignore the file, skip
+                if self.should_ignore(event.src_path):
+                    return
+
+                logger.info("\nChange detected: \"%s\" (%s)" %
+                            (event.src_path, event.event_type))
+
+                if scope.timer:
+                    scope.timer.cancel()
+                    scope.timer = None
+
+                scope.timer = Timer(WATCH_TIMEOUT, rerender)
+                scope.timer.start()
+
+            return AllEventsHandler(schedule_rerender)
 
         dir_handler = make_handler()
 
@@ -420,13 +451,13 @@ class Whizker:
             if os.path.isdir(path):
                 self.observer.schedule(
                     dir_handler,
-                    path,
+                    os.path.realpath(path), # Watch out for symlinks...
                     recursive=True)
             else:
                 # Watch the parent directory for the file pattern
                 self.observer.schedule(
                     make_handler(path),
-                    os.path.dirname(path),
+                    os.path.realpath(os.path.dirname(path)),
                     recursive=False)
 
         self.observer.start()
