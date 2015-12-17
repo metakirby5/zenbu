@@ -45,6 +45,7 @@ Diffs between the current destination files and
 template renderings are available via the --diff flag.
 """
 
+import collections
 import logging
 import os
 import codecs
@@ -134,6 +135,18 @@ def diff_colorify(line):
         return colored(line.encode('utf-8'), 'yellow')
     else:
         return line.encode('utf-8')
+
+def deep_update_dict(d, u):
+    for k, v in u.iteritems():
+        if isinstance(d, collections.Mapping):
+            if isinstance(v, collections.Mapping):
+                r = deep_update_dict(d.get(k, {}), v)
+                d[k] = r
+            else:
+                d[k] = u[k]
+        else:
+            d = {k: u[k]}
+    return d
 
 
 # Exceptions
@@ -265,7 +278,7 @@ class Whizker:
             self.watch_paths.add(name)
             if isinstance(to_merge, dict):
                 logger.info("Using \"%s\"..." % name)
-                self.variables.update(to_merge)
+                deep_update_dict(self.variables, to_merge)
             else:
                 raise FileParseError(name, "not in mapping format")
 
