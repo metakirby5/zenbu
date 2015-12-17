@@ -283,7 +283,7 @@ class Whizker:
                     logger.error(VariableRenderError(k, e))
 
                 # Eval {`...`}
-                for expr in re.findall(r'{`.*`}', v):
+                for expr in re.findall(r'{`.*?`}', v):
                     try:
                         v = v.replace(expr, str(eval(expr[2:-2])))
                     except Exception as e:
