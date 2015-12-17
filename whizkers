@@ -53,7 +53,7 @@ import yaml
 import re
 import argcomplete
 from sys import exit, stdout
-from subprocess import call
+from subprocess import call, check_output
 from threading import Timer
 from time import sleep
 from difflib import unified_diff
@@ -117,6 +117,11 @@ def variable_set_completer(prefix, **kwargs):
         argcomplete.warn(e)
     else:
         return (v for v in var_sets if v.startswith(prefix))
+
+def compgen_completer(prefix, **kwargs):
+    out = check_output('compgen -A function -abck',
+                       shell=True, universal_newlines=True)
+    return (v for v in out.split() if v.startswith(prefix))
 
 # Convenience functions
 def make_dirs_and_open(path):
@@ -552,7 +557,7 @@ def parse_args():
                         Default: Nothing
                         """,
                         type=str,
-                        default='')
+                        default=None).completer = compgen_completer
 
     parser.add_argument('--diff',
                         help="""
