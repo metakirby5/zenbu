@@ -153,6 +153,9 @@ def deep_update_dict(d, u):
             d = {k: u[k]}
     return d
 
+def deep_iter_empty(l):
+    return hasattr(l, '__iter__') and all(map(deep_iter_empty, l))
+
 
 # Exceptions
 class PathException(Exception):
@@ -424,6 +427,12 @@ class Whizker:
             def rerender():
                 logger.info("\nRe-rendering...")
                 self.refresh_variables()
+
+                # If there is no resulting difference, skip
+                if deep_iter_empty(self.diff()):
+                    logger.info("\nNo difference detected - skipping")
+                    return
+
                 self.render_and_write()
 
                 # Execute watch command
