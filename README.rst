@@ -5,6 +5,15 @@ Mustache + YAML based config templater.
 
 |Sample usage|
 
+Installation
+============
+
+::
+
+   pip install whizkers
+
+or just move ``whizkers`` to somewhere in your ``$PATH``.
+
 Dependencies
 ============
 
