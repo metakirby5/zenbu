@@ -7,10 +7,10 @@ A pystache + YAML based config templater.
 Searches for an optional yaml file with a variable mapping in
 ~/.config/whizkers/variables.yaml,
 
-an optional yaml file with an ignore scalar in (by default)
+an optional yaml file with an ignore scalar of regexes in (by default)
 ~/.config/whizkers/ignores.yaml,
 
-and uses the templates in (by default)
+and uses the mustache templates in (by default)
 ~/.config/whizkers/templates/
 
 to render into your home directory (by default).
@@ -31,7 +31,7 @@ first YAML variable defined >
 environment variables.
 
 Variables are shallowly resolved once, then anything in
-{`...`} is eval'd.
+{`...`} is eval'd in Python.
 
 Autocomplete support available, but only for the default
 variable set directory.
@@ -58,7 +58,7 @@ from threading import Timer
 from time import sleep
 from difflib import unified_diff
 from pydoc import pipepager # Dangerously undocumented...
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from termcolor import colored
 from colorlog import ColoredFormatter
 from pystache.renderer import Renderer
@@ -497,7 +497,8 @@ class Whizker:
 
 
 def parse_args():
-    parser = ArgumentParser(description=description)
+    parser = ArgumentParser(description=description,
+                            formatter_class=RawDescriptionHelpFormatter)
 
     parser.add_argument('-l',
                         help="""

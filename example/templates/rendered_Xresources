@@ -1,0 +1,42 @@
+! Fonts
+URxvt.font:      {{ #term_fonts }}xft:{{ . }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,{{ /term_fonts }}
+URxvt.boldFont:  {{ #term_fonts }}xft:{{ . }}{{ #use_bold }}:bold{{ /use_bold }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,{{ /term_fonts }}
+URxvt.letterSpace: {{ term_letterspace }}
+
+! Colors
+URxvt.borderColor:  {{ bgc }}
+URxvt.background:   {{ bgc }}
+URxvt.foreground:   {{ fgc }}
+
+! Black
+URxvt.color0:       {{ n_black }}
+URxvt.color8:       {{ b_black }}
+
+! Red
+URxvt.color1:       {{ n_red }}
+URxvt.color9:       {{ b_red }}
+
+! Green
+URxvt.color2:       {{ n_green }}
+URxvt.color10:      {{ b_green }}
+
+! Yellow
+URxvt.color3:       {{ n_yellow }}
+URxvt.color11:      {{ b_yellow }}
+
+! Blue
+URxvt.color4:       {{ n_blue }}
+URxvt.color12:      {{ b_blue }}
+
+! Magenta
+URxvt.color5:       {{ n_magenta }}
+URxvt.color13:      {{ b_magenta }}
+
+! Cyan
+URxvt.color6:       {{ n_cyan }}
+URxvt.color14:      {{ b_cyan }}
+
+! White
+URxvt.color7:       {{ n_white }}
+URxvt.color15:      {{ b_white }}
+

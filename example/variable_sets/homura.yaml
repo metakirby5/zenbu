@@ -1,0 +1,26 @@
+colors:
+  primary:      "cyan"
+  secondary:    "magenta"
+  background:   "#101015"
+  black:
+    normal:     "#202025"
+    bold:       "#303035"
+  red:
+    normal:     "#aa5171"
+    bold:       "#dc6892"
+  green:
+    normal:     "#9589aa"
+    bold:       "#c0b1dc"
+  yellow:
+    normal:     "#a795a6"
+    bold:       "#d9c1d7"
+  blue:
+    normal:     "#7e7eaa"
+    bold:       "#a3a3dc"
+  magenta:
+    normal:     "#a97b91"
+    bold:       "#db9fbb"
+  cyan:
+    normal:     "#646baa"
+    bold:       "#818adc"
+

@@ -1,0 +1,85 @@
+# Fonts
+term_fonts:
+  - "PixelMPlus12"
+  - "M+ 1p"
+  - "Baekmuk Gulim"
+use_bold: false
+pixelsize: 28
+term_letterspace: 2
+
+# Colors
+
+colors:
+  primary:      "blue"
+  secondary:    "red"
+  background:   "#272727"
+  foreground:   "#fafafa"
+  black:
+    normal:     "#353540"
+    bold:       "#545466"
+  red:
+    normal:     "#aa706b"
+    bold:       "#d28a84"
+  green:
+    normal:     "#aaaa76"
+    bold:       "#d2d291"
+  yellow:
+    normal:     "#c8b8a1"
+    bold:       "#f0dcc1"
+  blue:
+    normal:     "#87aaa6"
+    bold:       "#a6d2cd"
+  magenta:
+    normal:     "#7cb6c8"
+    bold:       "#94daf0"
+  cyan:
+    normal:     "#82aa88"
+    bold:       "#a0d2a8"
+  white:
+    normal:     "#d8d8d8"
+    bold:       "#eaeaea"
+
+# Utility
+
+colornumbers:
+  black:    0
+  red:      1
+  green:    2
+  yellow:   3
+  blue:     4
+  magenta:  5
+  cyan:     6
+  white:    7
+
+# Convenience
+
+bgc:        "{` {{ colors }}['background'] `}"
+fgc:        "{` {{ colors }}['foreground'] `}"
+
+n_black:    "{` {{ colors }}['black']['normal'] `}"
+b_black:    "{` {{ colors }}['black']['bold'] `}"
+n_red:      "{` {{ colors }}['red']['normal'] `}"
+b_red:      "{` {{ colors }}['red']['bold'] `}"
+n_green:    "{` {{ colors }}['green']['normal'] `}"
+b_green:    "{` {{ colors }}['green']['bold'] `}"
+n_yellow:   "{` {{ colors }}['yellow']['normal'] `}"
+b_yellow:   "{` {{ colors }}['yellow']['bold'] `}"
+n_blue:     "{` {{ colors }}['blue']['normal'] `}"
+b_blue:     "{` {{ colors }}['blue']['bold'] `}"
+n_magenta:  "{` {{ colors }}['magenta']['normal'] `}"
+b_magenta:  "{` {{ colors }}['magenta']['bold'] `}"
+n_cyan:     "{` {{ colors }}['cyan']['normal'] `}"
+b_cyan:     "{` {{ colors }}['cyan']['bold'] `}"
+n_white:    "{` {{ colors }}['white']['normal'] `}"
+b_white:    "{` {{ colors }}['white']['bold'] `}"
+
+n_primary:  "{` {{ colors }}[{{ colors }}['primary']]['normal'] `}"
+b_primary:  "{` {{ colors }}[{{ colors }}['primary']]['bold'] `}"
+n_secondary:  "{` {{ colors }}[{{ colors }}['secondary']]['normal'] `}"
+b_secondary:  "{` {{ colors }}[{{ colors }}['secondary']]['bold'] `}"
+
+text_primary:         "{` {{ colors }}['primary'] `}"
+text_secondary:       "{` {{ colors }}['secondary'] `}"
+ncmpcpp_primary_n:    "{` {{ colornumbers }}[{{ colors }}['primary']] + 1 `}"
+ncmpcpp_secondary_n:  "{` {{ colornumbers }}[{{ colors }}['secondary']] + 1 `}"
+

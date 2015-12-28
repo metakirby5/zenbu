@@ -1,0 +1,8 @@
+term_fonts:
+  - "Source Code Pro"
+  - "M+ 1p"
+  - "Baekmuk Gulim"
+
+use_bold: true
+term_letterspace: -1
+

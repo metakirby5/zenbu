@@ -24,23 +24,47 @@ usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
                 [--diff] [--dry]
                 [variable_files [variable_files ...]]
 
-A pystache + YAML based config templater. Searches for an optional yaml file
-with a variable mapping in ~/.config/whizkers/variables.yaml, an optional yaml
-file with an ignore scalar in (by default) ~/.config/whizkers/ignores.yaml,
-and uses the templates in (by default) ~/.config/whizkers/templates/ to render
-into your home directory (by default). Additional variable files can be
-applied by supplying them as arguments, in order of application. They can
-either be paths or, if located in (by default)
-~/.config/whizkers/variable_sets/, extension-less filenames. Environment
-variable support is available; simply put the name of the variable in mustache
-brackets. Order of precedence is: last YAML variable defined > first YAML
-variable defined > environment variables. Variables are shallowly resolved
-once, then anything in {`...`} is eval'd. Autocomplete support available, but
-only for the default variable set directory. A file watcher is available via
-the -w flag. Whenever a variable file in use, the ignores file, or a template
-file changes, the templates are rendered if there are any differences. Diffs
-between the current destination files and template renderings are available
-via the --diff flag.
+A pystache + YAML based config templater.
+
+Searches for an optional yaml file with a variable mapping in
+~/.config/whizkers/variables.yaml,
+
+an optional yaml file with an ignore scalar of regexes in (by default)
+~/.config/whizkers/ignores.yaml,
+
+and uses the mustache templates in (by default)
+~/.config/whizkers/templates/
+
+to render into your home directory (by default).
+
+Additional variable files can be applied
+by supplying them as arguments, in order of application.
+
+They can either be paths or, if located in (by default)
+~/.config/whizkers/variable_sets/,
+extension-less filenames.
+
+Environment variable support is available;
+simply put the name of the variable in mustache brackets.
+
+Order of precedence is:
+last YAML variable defined >
+first YAML variable defined >
+environment variables.
+
+Variables are shallowly resolved once, then anything in
+{`...`} is eval'd in Python.
+
+Autocomplete support available, but only for the default
+variable set directory.
+
+A file watcher is available via the -w flag.
+Whenever a variable file in use, the ignores file,
+or a template file changes, the templates are rendered
+if there are any differences.
+
+Diffs between the current destination files and
+template renderings are available via the --diff flag.
 
 positional arguments:
   variable_files        additional variable files
@@ -63,6 +87,7 @@ optional arguments:
   --diff                show diff between template renderings and current
                         destination files
   --dry                 do a dry run
+
 ```
 
 # Thanks to
