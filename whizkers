@@ -142,7 +142,7 @@ def diff_colorify(line):
         return line.encode('utf-8')
 
 def deep_update_dict(d, u):
-    for k, v in u.iteritems():
+    for k, v in iter(u.items()):
         if isinstance(d, collections.Mapping):
             if isinstance(v, collections.Mapping):
                 r = deep_update_dict(d.get(k, {}), v)
@@ -160,7 +160,8 @@ def deep_iter_empty(l):
 # Exceptions
 class PathException(Exception):
     def __init__(self, path, message=None):
-        super(PathException, self).__init__(message)
+        super(PathException, self).__init__()
+        self.message = message
         self.path = path
 
 
@@ -296,7 +297,7 @@ class Whizker:
         content in {`...`}
         """
         rendered_variables = {}
-        for k, v in self.variables.iteritems():
+        for k, v in iter(self.variables.items()):
             if isinstance(v, str):
                 try:
                     v = self.renderer.render(v, self.variables)

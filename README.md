@@ -4,7 +4,7 @@ Pystache + YAML based config templater.
 [![Sample usage](https://u.teknik.io/u8Au4P.gif)](https://u.teknik.io/lCAD1H.webm)
 
 # Dependencies
-- Python 2
+- Python (2 or 3)
 - pystache
 - PyYAML
 - watchdog
