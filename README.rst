@@ -8,8 +8,11 @@ Mustache + YAML based config templater.
 Installation
 ============
 
-Move ``whizkers`` to somewhere in your ``$PATH``.
-The pip install isn't working yet, but I'm currently fixing it...
+::
+
+   pip install whizkers
+
+or just move ``whizkers.py`` to somewhere in your ``$PATH``.
 
 Dependencies
 ============

@@ -10,7 +10,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='whizkers',
-    version='1.0.2',
+    version='1.0.4',
     description='Mustache + YAML based config templater.',
     long_description=long_description,
     url='https://github.com/metakirby5/whizkers',
@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     keywords='whizkers config templater mustache yaml',
-    packages=find_packages(),
+    py_modules=['whizkers'],
     install_requires=[
         'argcomplete',
         'colorlog',
