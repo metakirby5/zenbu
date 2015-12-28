@@ -32,6 +32,12 @@ Autocomplete
 
     sudo activate-global-python-argcomplete
 
+If you installed via pip, you may need to run the following before autocompletion works:
+
+::
+
+   grep 'PYTHON_ARGCOMPLETE_OK' "$(which whizkers)" &>/dev/null || sudo sed -i "1a # PYTHON_ARGCOMPLETE_OK" "$(which whizkers)"
+
 Usage
 =====
 
