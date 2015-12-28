@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
 
-description = """
+"""
 A pystache + YAML based config templater.
 
 Searches for an optional yaml file with a variable mapping in
@@ -498,7 +498,7 @@ class Whizker:
 
 
 def parse_args():
-    parser = ArgumentParser(description=description,
+    parser = ArgumentParser(description=__doc__,
                             formatter_class=RawDescriptionHelpFormatter)
 
     parser.add_argument('-l',
