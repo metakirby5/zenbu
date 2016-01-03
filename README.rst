@@ -18,6 +18,11 @@ Dependencies
 ============
 
 -  Python (2 or 3)
+
+The below are Python libraries that should be installed via ``pip``.
+Alternatively, if you did ``pip install whizkers``,
+these should have been automatically installed.
+
 -  argcomplete
 -  colorlog
 -  pystache
