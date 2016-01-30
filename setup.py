@@ -10,7 +10,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='whizkers',
-    version='1.0.4',
+    version='1.1.0',
     description='Mustache + YAML based config templater.',
     long_description=long_description,
     url='https://github.com/metakirby5/whizkers',
