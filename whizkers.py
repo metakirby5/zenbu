@@ -348,12 +348,18 @@ class Whizker:
         if self.var_set_path:
 
             # Get all the paths...
-            for name in os.listdir(self.var_set_path):
-                if not self.should_ignore(name):
-                    path = os.path.join(self.var_set_path, name)
-                    if os.path.isfile(path):
+            for root, subdirs, files in os.walk(self.var_set_path,
+                                                followlinks=True):
+
+                # Don't print the var set dir
+                short_root = re.sub(r'^%s/?' % self.var_set_path, '', root)
+
+                for name in files:
+                    if not self.should_ignore(name):
+                        path = os.path.join(short_root, name)
+
                         # Yield without .yaml
-                        yield re.sub(r'\.%s$' % TEMPLATE_EXT, '', name)
+                        yield re.sub(r'\.%s$' % TEMPLATE_EXT, '', path)
         else:
             raise ValueError("No variable set path to list from.")
 
@@ -362,7 +368,8 @@ class Whizker:
         """
         Yield pairs of (template file, destination file)
         """
-        for root, subdirs, files in os.walk(self.templates_path):
+        for root, subdirs, files in os.walk(self.templates_path,
+                                            followlinks=True):
 
             # Substitute the template dir for home dir
             dest_root = re.sub(r'^%s' % self.templates_path,
