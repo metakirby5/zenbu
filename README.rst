@@ -7,7 +7,8 @@ Mustache + YAML based config templater.
 
 The above gif shows some example usage with a script to
 automatically reload the desktop upon selection of a variable set.
-My script, `reload-desktop`_, is highly specialized for my use case,
+My scripts, `wzk`_ and `reload-desktop`_,
+are highly specialized for my use case,
 but can be a good way to study how to use whizkers.
 
 `fullsalvo`_ made an excellent set of utilities for whizkers,
@@ -135,6 +136,7 @@ Thanks to
 .. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
    :alt: Some sample usage with my automatic desktop reload script.
+.. _wzk: https://github.com/metakirby5/bash-scripts/blob/master/wzk
 .. _reload-desktop: https://github.com/metakirby5/bash-scripts/blob/master/reload-desktop
 .. _fullsalvo: https://github.com/fullsalvo
 .. _wz-utils: https://github.com/fullsalvo/wz-utils
