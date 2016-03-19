@@ -131,7 +131,7 @@ Thanks to
 -  https://github.com/defunkt/pystache
 -  http://pyyaml.org/
 
-.. |Sample Usage| figure:: https://u.teknik.io/u8Au4P.gif
+.. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
    :alt: Some sample usage with my automatic desktop reload script.
 .. _reload-desktop: https://github.com/metakirby5/bash-scripts/blob/master/reload-desktop
