@@ -5,10 +5,11 @@ Mustache + YAML based config templater.
 
 |Sample Usage|
 
-Some example usage with a script to automatically reload the
-desktop upon selection of a variable set. My script,
-`reload-desktop`_, is highly specialized for my use case,
+The above gif shows some example usage with a script to
+automatically reload the desktop upon selection of a variable set.
+My script, `reload-desktop`_, is highly specialized for my use case,
 but can be a good way to study how to use whizkers.
+
 `fullsalvo`_ made an excellent set of utilities for whizkers,
 so I recommend you check out his repository at `wz-utils`_.
 
