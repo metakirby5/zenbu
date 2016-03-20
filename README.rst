@@ -1,7 +1,7 @@
 whizkers
 ========
 
-Mustache + YAML based config templater.
+`mustache`_ + `YAML`_ based config templater.
 
 |Sample Usage|
 
@@ -136,6 +136,8 @@ Thanks to
 .. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
    :alt: Some sample usage with my automatic desktop reload script.
+.. _mustache: https://mustache.github.io/
+.. _YAML: http://yaml.org/
 .. _wzk: https://github.com/metakirby5/bash-scripts/blob/master/wzk
 .. _reload-desktop: https://github.com/metakirby5/bash-scripts/blob/master/reload-desktop
 .. _fullsalvo: https://github.com/fullsalvo
