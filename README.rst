@@ -57,6 +57,8 @@ If you installed via pip, you may need to run the following before autocompletio
 Usage
 =====
 
+Check the `example`_ folder for some sample usage!
+
 ::
 
     usage: whizkers [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
@@ -144,3 +146,4 @@ Thanks to
 .. _reload-desktop: https://github.com/metakirby5/bash-scripts/blob/master/reload-desktop
 .. _fullsalvo: https://github.com/fullsalvo
 .. _wz-utils: https://github.com/fullsalvo/wz-utils
+.. _example: example
