@@ -22,6 +22,8 @@ Installation
    pip install whizkers
 
 or just move ``whizkers.py`` to somewhere in your ``$PATH``.
+If you do the latter, you must install the dependencies in the
+following section manually.
 
 Dependencies
 ============
