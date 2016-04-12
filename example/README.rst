@@ -15,10 +15,10 @@ of this directory in ~/.config/whizkers and try out the following:
    change would affect rendering, everything is rerendered and
    ``xrdb -merge ~/.rendered_Xresources`` is run.
 
-Usage Information
-=================
+Additional Usage Information
+============================
 
-whizkers is a file templater written in python. It uses pystache and yaml as the base for file templating. This means that when you run it, it'll use variables you've assigned to fill in fields in other files you've created templates for. To be exact, whizkers uses the folder ``#HOME/.config/whizkers/templates/`` as a clone of your ``$HOME`` directory. Files within this folder are rewritten, filling in fields of the form ``{{ variable_name }}`` with what ``variable_name`` has been defined as within yaml files. This gives you the power to rewrite configuration files on-the-fly then reload your programs to update apperances almost instantly (or at least that's how I use whizkers). The standard yaml file referenced is ``$HOME/.config/whizkers/defaults.yaml``. Variations you make should be stored in ``$HOME/.config/whizkers/variable_sets/`` (which also allows you to nest folders for better organization).
+``whizkers`` is a file templater written in python. It uses pystache and yaml as the base for file templating. This means that when you run it, it'll use variables you've assigned to fill in fields in other files you've created templates for. To be exact, whizkers uses the folder ``$HOME/.config/whizkers/templates/`` as a clone of your ``$HOME`` directory. Files within this folder are rewritten, filling in fields of the form ``{{ variable_name }}`` with what ``variable_name`` has been defined as within yaml files. This gives you the power to rewrite configuration files on-the-fly then reload your programs to update apperances almost instantly (or at least that's how I use whizkers). The standard yaml file referenced is ``$HOME/.config/whizkers/defaults.yaml``. Variations you make should be stored in ``$HOME/.config/whizkers/variable_sets/`` (which also allows you to nest folders for better organization).
 
 Let's have an example. Say you want to change your files to a theme in a file ``bright.yaml`` in your ``variable_sets`` directory and you have one file in your ``templates`` directory, ``.Xresources``. In ``bright.yaml``, contents might look something like
 
@@ -170,5 +170,7 @@ Then the ultimately rewritten file from a call of ``whizkers bright`` (whizkers 
     *.color15:      #F1F2E0
 
 This process only rewrites the file, however. If you want functionality with reloading like metakirby5 and I have, you need to use scripting, like a script in `wz-utils`_ , ``rhisk``.
+
+This example is only the tip of the iceberg of what whizkers can be used for. If you want to understand all its power, start messing around with it yourself! Have fun!
 
 .. _wz-utils: https://github.com/fullsalvo/wz-utils
