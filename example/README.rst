@@ -169,7 +169,7 @@ Then the ultimately rewritten file from a call of ``whizkers bright`` (whizkers 
     *.color7:       #A5B9C4
     *.color15:      #F1F2E0
 
-This process only rewrites the file, however. If you want functionality with reloading like metakirby5 and I have, you need to use scripting, like a script in `wz-utils`_ , ``rhisk``.
+This process only rewrites the file, however. If you want functionality with reloading like metakirby5 and fullsalvo have, you need to use scripting, like a script in `wz-utils`_ , ``rhisk``.
 
 This example is only the tip of the iceberg of what whizkers can be used for. If you want to understand all its power, start messing around with it yourself! Have fun!
 
