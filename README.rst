@@ -11,8 +11,8 @@ My scripts, `wzk`_ and `reload-desktop`_,
 are highly specialized for my use case,
 but can be a good way to study how to use whizkers.
 
-`fullsalvo`_ made an excellent set of utilities for whizkers,
-so I recommend you check out his repository at `wz-utils`_.
+A similar effect can be achieved by writing your own scripts, or by using
+some of the tools in the `Resources`_ section.
 
 Installation
 ============
@@ -130,12 +130,21 @@ Check the `example`_ folder for some sample usage!
                             destination files
       --dry                 do a dry run
 
+Resources
+=========
+
+- `wz-utils`_: An excellent collection of utilities for whizkers centered
+  around theming.
+- `whizkers-server`_: A graphical web frontend for previewing and switching
+  themes.
+
 Thanks to
 =========
 
 -  https://gist.github.com/coleifer/33484bff21c34644dae1
 -  https://github.com/defunkt/pystache
 -  http://pyyaml.org/
+-  `fullsalvo`_ for ideas, opinions, shilling, and overall being a good guy
 
 .. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
@@ -144,6 +153,7 @@ Thanks to
 .. _YAML: http://yaml.org/
 .. _wzk: https://github.com/metakirby5/bash-scripts/blob/master/wzk
 .. _reload-desktop: https://github.com/metakirby5/bash-scripts/blob/master/reload-desktop
-.. _fullsalvo: https://github.com/fullsalvo
-.. _wz-utils: https://github.com/fullsalvo/wz-utils
 .. _example: example
+.. _wz-utils: https://github.com/fullsalvo/wz-utils
+.. _whizkers-server: https://github.com/97-109-107/whizkers-server
+.. _fullsalvo: https://github.com/fullsalvo
