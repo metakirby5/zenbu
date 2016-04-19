@@ -141,10 +141,11 @@ Resources
 Thanks to
 =========
 
--  https://gist.github.com/coleifer/33484bff21c34644dae1
--  https://github.com/defunkt/pystache
--  http://pyyaml.org/
--  `fullsalvo`_ for ideas, opinions, shilling, and overall being a good guy
+- https://gist.github.com/coleifer/33484bff21c34644dae1
+- https://github.com/defunkt/pystache
+- http://pyyaml.org/
+- `fullsalvo`_ for ideas, opinions, contributing to documentation,
+  shilling, and overall being a good guy
 
 .. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
