@@ -1,6 +1,8 @@
 whizkers
 ========
 
+|Codacy Badge|
+
 `mustache`_ + `YAML`_ based config templater.
 
 |Sample Usage|
@@ -147,6 +149,8 @@ Thanks to
 - `fullsalvo`_ for ideas, opinions, contributing to documentation,
   shilling, and overall being a good guy
 
+.. |Codacy Badge| image:: https://api.codacy.com/project/badge/Grade/85b37d97155846868117495afbd95e35
+   :target: https://www.codacy.com/app/metakirby5/whizkers
 .. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
    :alt: Some sample usage with my automatic desktop reload script.
