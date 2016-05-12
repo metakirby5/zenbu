@@ -48,11 +48,11 @@ template renderings are available via the --diff flag.
 import collections
 import logging
 import os
+import sys
 import codecs
 import yaml
 import re
 import argcomplete
-from sys import exit, stdout
 from subprocess import call, check_output
 from threading import Timer
 from time import sleep
@@ -103,7 +103,7 @@ def variable_set_completer(prefix, **kwargs):
             WHIZKERS_VAR_SETS,
             ignores=WHIZKERS_IGNORES,
         ).var_sets
-    except FileNotFoundError as e:
+    except NotFoundError as e:
         # Try again with no ignores file
         try:
             var_sets = Whizker(
@@ -111,9 +111,9 @@ def variable_set_completer(prefix, **kwargs):
                 DUMMY,
                 WHIZKERS_VAR_SETS,
             ).var_sets
-        except FileNotFoundError as e:
+        except NotFoundError as e:
             argcomplete.warn(e)
-    except FileParseError as e:
+    except ParseError as e:
         argcomplete.warn(e)
     else:
         return (v for v in var_sets if v.startswith(prefix))
@@ -165,7 +165,7 @@ class PathException(Exception):
         self.path = path
 
 
-class FileNotFoundError(PathException):
+class NotFoundError(PathException):
     def __str__(self):
         msg = "Was not found: \"%s\"" % self.path
         if self.message:
@@ -173,7 +173,7 @@ class FileNotFoundError(PathException):
         return msg
 
 
-class FileParseError(PathException):
+class ParseError(PathException):
     def __str__(self):
         msg = "Could not parse: \"%s\"" % self.path
         if self.message:
@@ -181,7 +181,7 @@ class FileParseError(PathException):
         return msg
 
 
-class FileRenderError(PathException):
+class RenderError(PathException):
     def __str__(self):
         msg = "Could not render: \"%s\"" % self.path
         if self.message:
@@ -223,10 +223,11 @@ class Whizker:
                  dest_path,
                  var_set_path=None,
                  use_env_vars=False,
-                 variables=[],
+                 variables=None,
                  ignores=None,
                  watch_command=None):
 
+        variables = variables or []             # PyLint W0102
         self.init_params = locals()             # Save locals for later
         self.watch_paths = set()                # List of paths to watch
 
@@ -243,17 +244,17 @@ class Whizker:
             self.templates_path = templates_path
             self.watch_paths.add(templates_path)
         else:
-            raise FileNotFoundError(templates_path, "templates path")
+            raise NotFoundError(templates_path, "templates path")
 
         if os.path.exists(dest_path):
             self.dest_path = dest_path
         else:
-            raise FileNotFoundError(dest_path, "destination path")
+            raise NotFoundError(dest_path, "destination path")
 
         if not var_set_path or os.path.exists(var_set_path):
             self.var_set_path = var_set_path
         else:
-            raise FileNotFoundError(var_set_path, "variable set path")
+            raise NotFoundError(var_set_path, "variable set path")
 
         # Initial setup
         self.refresh_variables()
@@ -280,16 +281,16 @@ class Whizker:
             with codecs.open(name, 'r', 'utf-8') as f:
                 to_merge = yaml.load(f.read())
         except IOError:
-            raise FileNotFoundError(name, "variables file")
+            raise NotFoundError(name, "variables file")
         except yaml.parser.ParserError as e:
-            raise FileParseError(name, e)
+            raise ParseError(name, e)
         else:
             self.watch_paths.add(name)
             if isinstance(to_merge, dict):
                 logger.info("Using \"%s\"..." % name)
                 deep_update_dict(self.variables, to_merge)
             else:
-                raise FileParseError(name, "not in mapping format")
+                raise ParseError(name, "not in mapping format")
 
     def render_variables(self):
         """
@@ -320,15 +321,15 @@ class Whizker:
             with codecs.open(name, 'r', 'utf-8') as f:
                 to_merge = yaml.load(f.read())
         except IOError:
-            raise FileNotFoundError(name, "ignores file")
+            raise NotFoundError(name, "ignores file")
         except yaml.parser.ParserError as e:
-            raise FileParseError(e, name)
+            raise ParseError(e, name)
         else:
             self.watch_paths.add(name)
             if isinstance(to_merge, list):
                 self.ignores |= set(re.compile(i) for i in to_merge)
             else:
-                raise FileParseError(name, "not in scalar format")
+                raise ParseError(name, "not in scalar format")
 
     def should_ignore(self, name):
         """
@@ -348,7 +349,7 @@ class Whizker:
         if self.var_set_path:
 
             # Get all the paths...
-            for root, subdirs, files in os.walk(self.var_set_path,
+            for root, _, files in os.walk(self.var_set_path,
                                                 followlinks=True):
 
                 # Don't print the var set dir
@@ -368,7 +369,7 @@ class Whizker:
         """
         Yield pairs of (template file, destination file)
         """
-        for root, subdirs, files in os.walk(self.templates_path,
+        for root, _, files in os.walk(self.templates_path,
                                             followlinks=True):
 
             # Substitute the template dir for home dir
@@ -395,9 +396,9 @@ class Whizker:
                     yield (dest, os.stat(template).st_mode,
                            self.renderer.render(f.read(), self.variables))
             except KeyNotFoundError as e:
-                logger.error(FileRenderError(template, e))
+                logger.error(RenderError(template, e))
             except IOError as e:
-                logger.error(FileNotFoundError(template, e))
+                logger.error(NotFoundError(template, e))
 
     def render_and_write(self):
         for dest, mode, result in self.render():
@@ -413,7 +414,7 @@ class Whizker:
                 logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
-        for dest, mode, result in self.render():
+        for dest, _, result in self.render():
             try:
                 with codecs.open(dest, 'r', 'utf-8') as f:
                     yield unified_diff(
@@ -604,7 +605,7 @@ def main():
     args = parse_args()
 
     # Set up logging
-    ch = logging.StreamHandler(stdout)
+    ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(ColoredFormatter("%(log_color)s%(message)s"))
     logger.addHandler(ch)
@@ -633,9 +634,9 @@ def main():
             args.ignores_file,
             args.watch_command
         )
-    except (FileNotFoundError, FileParseError) as e:
+    except (NotFoundError, ParseError) as e:
         logger.critical(e)
-        exit(1)
+        sys.exit(1)
 
     if args.list_var_sets:
         try:
@@ -643,7 +644,7 @@ def main():
                 print(var_set)
         except ValueError as e:
             logger.critical(e)
-            exit(1)
+            sys.exit(1)
 
     elif args.diff:
         pipepager(
@@ -657,7 +658,7 @@ def main():
 
     elif args.dry:
         logger.warning("Commencing dry run...")
-        for dest, mode, result in whizker.render():
+        for dest, _, _ in whizker.render():
             logger.info("Successfully dry rendered \"%s\"" % dest)
 
     elif args.watch:
