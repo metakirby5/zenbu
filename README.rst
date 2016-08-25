@@ -1,5 +1,9 @@
-sanpai
-======
+===============
+ sanpai (参拝)
+===============
+------------------------------------------------------------------
+ visit to a shrine or temple; paying homage at a shrine or temple
+------------------------------------------------------------------
 
 THIS IS A WORK IN PROGRESS
 
@@ -154,7 +158,7 @@ Thanks to
 .. |Sample Usage| image:: https://u.teknik.io/u8Au4P.gif
    :target: https://u.teknik.io/lCAD1H.webm
    :alt: Some sample usage with my automatic desktop reload script.
-.. _mustache: https://mustache.github.io/
+.. _Jinja2: http://jinja.pocoo.org/
 .. _YAML: http://yaml.org/
 .. _wzk: https://github.com/metakirby5/bash-scripts/blob/master/wzk
 .. _reload-desktop: https://github.com/metakirby5/bash-scripts/blob/master/reload-desktop
