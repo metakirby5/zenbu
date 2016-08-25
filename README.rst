@@ -15,13 +15,16 @@ Why leave pystache?
 -------------------
 
 While the use of mustache worked well, the largest contributing factor to
-the switch was the logic-less approach to templating.
+the switch was the logic-less approach to templating. Logic can be useful
+in the configuration process on occasion, and that lack of functionality
+presents hurdles in use at times.
 
 Installation
 ============
 
 Currently, the easiest method of installation is to move ``sanpai.py``
-to somewhere in your ``$PATH``. Be warned, you must install the dependencies in the following section manually.
+to somewhere in your ``$PATH``. Be warned, you must install the
+dependencies in the following section manually.
 
 Dependencies
 ============
@@ -39,8 +42,6 @@ The below are Python libraries that should be installed via ``pip``.
 
 Usage
 =====
-
-Check the `example`_ folder for some sample usage!
 
 ::
 
