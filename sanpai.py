@@ -2,7 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 """
-A pystache + YAML based config templater.
+A Jinja2 + YAML based config templater.
 
 Searches for an optional yaml file with a variable mapping in
 ~/.config/whizkers/variables.yaml,
@@ -10,7 +10,7 @@ Searches for an optional yaml file with a variable mapping in
 an optional yaml file with an ignore scalar of regexes in (by default)
 ~/.config/whizkers/ignores.yaml,
 
-and uses the mustache templates in (by default)
+and uses the Jinja2 templates in (by default)
 ~/.config/whizkers/templates/
 
 to render into your home directory (by default).
@@ -23,15 +23,12 @@ They can either be paths or, if located in (by default)
 extension-less filenames.
 
 Environment variable support is available;
-simply put the name of the variable in mustache brackets.
+simply put the name of the variable in Jinja2 brackets.
 
 Order of precedence is:
 last YAML variable defined >
 first YAML variable defined >
 environment variables.
-
-Variables are shallowly resolved once, then anything in
-{`...`} is eval'd in Python.
 
 Autocomplete support available, but only for the default
 variable set directory.
@@ -61,9 +58,7 @@ from pydoc import pipepager # Dangerously undocumented...
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from termcolor import colored
 from colorlog import ColoredFormatter
-from pystache.renderer import Renderer
-from pystache.common import MissingTags
-from pystache.context import KeyNotFoundError
+from jinja2 import Enviornment, PackageLoader
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -231,11 +226,6 @@ class Whizker:
         self.init_params = locals()             # Save locals for later
         self.watch_paths = set()                # List of paths to watch
 
-        self.renderer = Renderer(
-            missing_tags=MissingTags.strict,    # Alert on missing vars
-            escape=lambda x: x,                 # Don't escape
-        )
-
         self.observer = Observer()
         self.watch_command = watch_command
 
@@ -257,13 +247,12 @@ class Whizker:
             raise NotFoundError(var_set_path, "variable set path")
 
         # Initial setup
+        self.env = Environment(loader=PackageLoader('sanpai', templates_path))
         self.refresh_variables()
 
     def refresh_variables(self):
         self.variables = {}             # {variable: value}
         self.ignores = set()            # Set of regexes
-        self.variables_rendered = False # Whether or not variables have been
-                                        # shallowly rendered
 
         if self.init_params['use_env_vars']:
             self.variables.update(dict(os.environ))
@@ -291,30 +280,6 @@ class Whizker:
                 deep_update_dict(self.variables, to_merge)
             else:
                 raise ParseError(name, "not in mapping format")
-
-    def render_variables(self):
-        """
-        Shallowly resolves variables within variables, then evals
-        content in {`...`}
-        """
-        rendered_variables = {}
-        for k, v in iter(self.variables.items()):
-            if isinstance(v, str):
-                try:
-                    v = self.renderer.render(v, self.variables)
-                except KeyNotFoundError as e:
-                    logger.error(VariableRenderError(k, e))
-
-                # Eval {`...`}
-                for expr in re.findall(r'{`.*?`}', v):
-                    try:
-                        v = v.replace(expr, str(eval(expr[2:-2])))
-                    except Exception as e:
-                        logger.error(VariableRenderError(k, e))
-
-                rendered_variables[k] = v
-        self.variables.update(rendered_variables)
-        self.variables_rendered = True
 
     def add_ignores(self, name):
         try:
@@ -388,8 +353,6 @@ class Whizker:
         Yield tuples of (destination file, mode, what to write).
         If there is a file render error, log it.
         """
-        if not self.variables_rendered:
-            self.render_variables()
         for template, dest in self.render_pairs:
             try:
                 with codecs.open(template, 'r', 'utf-8') as f:
