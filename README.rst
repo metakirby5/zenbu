@@ -78,9 +78,6 @@ Usage
     first YAML variable defined >
     environment variables.
 
-    Variables are shallowly resolved once, then anything in
-    {%...%} is eval'd in Python.
-
     Autocomplete support available, but only for the default
     variable set directory.
 
