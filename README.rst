@@ -1,9 +1,9 @@
-whizkers
-========
+sanpai
+======
 
-|Codacy Badge|
+THIS IS A WORK IN PROGRESS
 
-`mustache`_ + `YAML`_ based config templater.
+`Jinja2`_ + `YAML`_ based config templater.
 
 |Sample Usage|
 

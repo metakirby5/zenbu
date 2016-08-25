@@ -10,11 +10,11 @@ with codecs.open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='whizkers',
-    version='1.1.0',
-    description='Mustache + YAML based config templater.',
+    name='sanpai',
+    version='0.0.0',
+    description='Jinja2 + YAML based config templater.',
     long_description=long_description,
-    url='https://github.com/metakirby5/whizkers',
+    url='https://github.com/metakirby5/sanpai',
     author='Ethan Chan',
     author_email='metakirby5@gmail.com',
     license='MIT',
@@ -30,19 +30,19 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
-    keywords='whizkers config templater mustache yaml',
-    py_modules=['whizkers'],
+    keywords='sanpai config templater jinja2 yaml',
+    py_modules=['sanpai'],
     install_requires=[
         'argcomplete',
         'colorlog',
-        'pystache',
+        'jinja2',
         'PyYAML',
         'termcolor',
         'watchdog',
     ],
     entry_points={
         'console_scripts': [
-            'whizkers=whizkers:main',
+            'sanpai=sanpai:main',
         ],
     },
 )
