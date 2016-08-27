@@ -50,36 +50,3 @@ colornumbers:
   magenta:  5
   cyan:     6
   white:    7
-
-# Convenience
-
-bgc:        "{` {{ colors }}['background'] `}"
-fgc:        "{` {{ colors }}['foreground'] `}"
-
-n_black:    "{` {{ colors }}['black']['normal'] `}"
-b_black:    "{` {{ colors }}['black']['bold'] `}"
-n_red:      "{` {{ colors }}['red']['normal'] `}"
-b_red:      "{` {{ colors }}['red']['bold'] `}"
-n_green:    "{` {{ colors }}['green']['normal'] `}"
-b_green:    "{` {{ colors }}['green']['bold'] `}"
-n_yellow:   "{` {{ colors }}['yellow']['normal'] `}"
-b_yellow:   "{` {{ colors }}['yellow']['bold'] `}"
-n_blue:     "{` {{ colors }}['blue']['normal'] `}"
-b_blue:     "{` {{ colors }}['blue']['bold'] `}"
-n_magenta:  "{` {{ colors }}['magenta']['normal'] `}"
-b_magenta:  "{` {{ colors }}['magenta']['bold'] `}"
-n_cyan:     "{` {{ colors }}['cyan']['normal'] `}"
-b_cyan:     "{` {{ colors }}['cyan']['bold'] `}"
-n_white:    "{` {{ colors }}['white']['normal'] `}"
-b_white:    "{` {{ colors }}['white']['bold'] `}"
-
-n_primary:  "{` {{ colors }}[{{ colors }}['primary']]['normal'] `}"
-b_primary:  "{` {{ colors }}[{{ colors }}['primary']]['bold'] `}"
-n_secondary:  "{` {{ colors }}[{{ colors }}['secondary']]['normal'] `}"
-b_secondary:  "{` {{ colors }}[{{ colors }}['secondary']]['bold'] `}"
-
-text_primary:         "{` {{ colors }}['primary'] `}"
-text_secondary:       "{` {{ colors }}['secondary'] `}"
-ncmpcpp_primary_n:    "{` {{ colornumbers }}[{{ colors }}['primary']] + 1 `}"
-ncmpcpp_secondary_n:  "{` {{ colornumbers }}[{{ colors }}['secondary']] + 1 `}"
-

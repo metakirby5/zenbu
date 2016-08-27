@@ -1,0 +1,6 @@
+argcomplete
+colorlog
+jinja2
+pyyaml
+termcolor
+watchdog

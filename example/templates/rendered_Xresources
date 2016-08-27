@@ -1,42 +1,48 @@
 ! Fonts
-URxvt.font:      {{ #term_fonts }}xft:{{ . }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,{{ /term_fonts }}
-URxvt.boldFont:  {{ #term_fonts }}xft:{{ . }}{{ #use_bold }}:bold{{ /use_bold }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,{{ /term_fonts }}
+URxvt.font: {% for f in term_fonts -%}
+  xft:{{ f }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
+{%- endfor %}
+URxvt.boldfont: {% for f in term_fonts -%}
+  xft:{{ f }}{% if use_bold %}:bold{% endif %}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
+{%- endfor %}
 URxvt.letterSpace: {{ term_letterspace }}
 
 ! Colors
-URxvt.borderColor:  {{ bgc }}
-URxvt.background:   {{ bgc }}
-URxvt.foreground:   {{ fgc }}
+URxvt.borderColor:  {{ colors.background }}
+URxvt.background:   {{ colors.background }}
+URxvt.foreground:   {{ colors.foreground }}
 
 ! Black
-URxvt.color0:       {{ n_black }}
-URxvt.color8:       {{ b_black }}
+URxvt.color0:       {{ colors.black.normal }}
+URxvt.color8:       {{ colors.black.bold }}
 
 ! Red
-URxvt.color1:       {{ n_red }}
-URxvt.color9:       {{ b_red }}
+URxvt.color1:       {{ colors.red.normal }}
+URxvt.color9:       {{ colors.red.bold }}
 
 ! Green
-URxvt.color2:       {{ n_green }}
-URxvt.color10:      {{ b_green }}
+URxvt.color2:       {{ colors.green.normal }}
+URxvt.color10:      {{ colors.green.bold }}
 
 ! Yellow
-URxvt.color3:       {{ n_yellow }}
-URxvt.color11:      {{ b_yellow }}
+URxvt.color3:       {{ colors.yellow.normal }}
+URxvt.color11:      {{ colors.yellow.bold }}
 
 ! Blue
-URxvt.color4:       {{ n_blue }}
-URxvt.color12:      {{ b_blue }}
+URxvt.color4:       {{ colors.blue.normal }}
+URxvt.color12:      {{ colors.blue.bold }}
 
 ! Magenta
-URxvt.color5:       {{ n_magenta }}
-URxvt.color13:      {{ b_magenta }}
+URxvt.color5:       {{ colors.magenta.normal }}
+URxvt.color13:      {{ colors.magenta.bold }}
 
 ! Cyan
-URxvt.color6:       {{ n_cyan }}
-URxvt.color14:      {{ b_cyan }}
+URxvt.color6:       {{ colors.cyan.normal }}
+URxvt.color14:      {{ colors.cyan.bold }}
 
 ! White
-URxvt.color7:       {{ n_white }}
-URxvt.color15:      {{ b_white }}
+URxvt.color7:       {{ colors.white.normal }}
+URxvt.color15:      {{ colors.white.bold }}
 
+! RGB test
+! {{ colors.red.normal | hex2rgb }}

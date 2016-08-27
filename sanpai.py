@@ -30,6 +30,8 @@ Environment variable support is available;
 simply run with the `-e` flag and
 put the name of the variable in Jinja2 brackets.
 
+The default Jinja2 globals and filters are available.
+
 Order of precedence is:
 last YAML variable defined >
 first YAML variable defined >
@@ -45,6 +47,9 @@ if there are any differences.
 
 Diffs between the current destination files and
 template renderings are available via the --diff flag.
+
+For help on designing templates, refer to
+http://jinja.pocoo.org/docs/dev/templates/
 """
 
 import collections

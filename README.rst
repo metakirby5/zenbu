@@ -4,61 +4,84 @@
 
 *visit to a shrine or temple; paying homage at a shrine or temple*
 
-whizkers 2.0
-============
-
-**THIS IS A WORK IN PROGRESS**
+**UNDER CONSTRUCTION**
 
 `Jinja2`_ + `YAML`_ based config templater.
 
-Why leave pystache?
--------------------
+What happened to whizkers?
+--------------------------
 
-While the use of mustache worked well, the largest contributing factor to
-the switch was the logic-less approach to templating. Logic can be useful
-in the configuration process on occasion, and that lack of functionality
-presents hurdles in use at times.
+This project may seem awfully similar to `whizkers`_; in fact, this is a fork
+of whizkers which swaps the Mustache backend out with Jinja2. I'm keeping
+whizkers around for compatibility reasons. So what are the reasons for
+switching?
+
+- Comprehensive documentation: See the
+  `Jinja2 Template Designer Documentation`_.
+- Better logic: Everything from if/else to macros. I originally praised
+  Mustache for its logic-less philosophy, but then I realized that there would
+  be no place to put logic other than the variable sets, which is a nightmare.
+- Expressions: You can now do ``{{ foo.bar }}``. You can even do
+  ``{{ 1 + 1 }}``. But please don't.
+- Filters: You can now do ``{{ colors.black.bold | hex2rgb }}``.
+- Better whitespace control: This means readable templates.
 
 Installation
-============
+------------
 
 Currently, the easiest method of installation is to move ``sanpai.py``
 to somewhere in your ``$PATH``. Be warned, you must install the
 dependencies in the following section manually.
 
 Dependencies
-============
+------------
 
 -  Python (2 or 3)
 
 The below are Python libraries that should be installed via ``pip``.
 
--  argcomplete
--  colorlog
--  Jinja2
--  PyYAML
--  termcolor
--  watchdog
+- argcomplete
+- colorlog
+- Jinja2
+- PyYAML
+- termcolor
+- watchdog
 
-Usage
-=====
+
+Tab completion
+--------------
 
 ::
 
-    usage: sanpai [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
-                    [-i IGNORES_FILE] [-e] [-w] [--watch-command WATCH_COMMAND]
-                    [--diff] [--dry]
-                    [variable_files [variable_files ...]]
+    sudo activate-global-python-argcomplete
+
+If you installed via pip, you may need to run the following before autocompletion works:
+
+::
+
+   grep 'PYTHON_ARGCOMPLETE_OK' "$(which sanpai)" &>/dev/null || sudo sed -i "1a # PYTHON_ARGCOMPLETE_OK" "$(which sanpai)"
+
+Usage
+-----
+
+::
+    usage: sanpai.py [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
+                     [-f FILTERS] [-i IGNORES_FILE] [-e] [-w]
+                     [--watch-command WATCH_COMMAND] [--diff] [--dry]
+                     [variable_files [variable_files ...]]
 
     A Jinja2 + YAML based config templater.
 
     Searches for an optional yaml file with a variable mapping in
-    ~/.config/sanpai/variables.yaml,
+    ~/.config/sanpai/defaults.yaml,
+
+    an optional python file with filters in (by default)
+    ~/.config/sanpai/filters.py,
 
     an optional yaml file with an ignore scalar of regexes in (by default)
     ~/.config/sanpai/ignores.yaml,
 
-    and uses the mustache templates in (by default)
+    and uses the Jinja2 templates in (by default)
     ~/.config/sanpai/templates/
 
     to render into your home directory (by default).
@@ -71,7 +94,10 @@ Usage
     extension-less filenames.
 
     Environment variable support is available;
-    simply put the name of the variable in mustache brackets.
+    simply run with the `-e` flag and
+    put the name of the variable in Jinja2 brackets.
+
+    The default Jinja2 globals and filters are available.
 
     Order of precedence is:
     last YAML variable defined >
@@ -96,12 +122,14 @@ Usage
       -h, --help            show this help message and exit
       -l                    list variable sets.
       -t TEMPLATE_DIR       template directory. Default:
-                            /home/echan/.config/sanpai/templates
-      -d DEST_DIR           destination directory. Default: /home/echan
+                            /Users/echan/.config/sanpai/templates
+      -d DEST_DIR           destination directory. Default: /Users/echan
       -s VAR_SET_DIR        variable set directory. Default:
-                            /home/echan/.config/sanpai/variable_sets
+                            /Users/echan/.config/sanpai/variable_sets
+      -f FILTERS            filters file. Default:
+                            /Users/echan/.config/sanpai/filters.py
       -i IGNORES_FILE       ignores file. Default:
-                            /home/echan/.config/sanpai/ignores.yaml
+                            /Users/echan/.config/sanpai/ignores.yaml
       -e                    whether or not to use environment variables. Default:
                             don't use environment variables
       -w                    start file watcher.
@@ -111,8 +139,11 @@ Usage
                             destination files
       --dry                 do a dry run
 
+    For help on designing templates, refer to
+    http://jinja.pocoo.org/docs/dev/templates/
+
 Thanks to
-=========
+---------
 
 - https://gist.github.com/coleifer/33484bff21c34644dae1
 - http://jinja.pocoo.org/
@@ -122,4 +153,7 @@ Thanks to
 
 .. _Jinja2: http://jinja.pocoo.org/
 .. _YAML: http://yaml.org/
+.. _Jinja2 Template Designer Documentation:
+     http://jinja.pocoo.org/docs/dev/templates/
+.. _whizkers: https://github.com/metakirby5/whizkers
 .. _fullsalvo: https://github.com/fullsalvo

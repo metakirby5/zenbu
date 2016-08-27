@@ -1,26 +1,44 @@
 Example
-=======
+-------
 
-This is an example of a ~/.config/whizkers directory. Stick the contents
-of this directory in ~/.config/whizkers and try out the following:
+This is an example of a ~/.config/sanpai directory. Stick the contents
+of this directory in ~/.config/sanpai and try out the following, observing
+what happens to ``~/rendered_Xresources`` each time.
 
--  ``whizkers`` will render with ``defaults.yaml``
--  ``whizkers homura`` will render with ``defaults.yaml``, but using the
-   colors from ``variable_sets/homura.yaml``
--  ``whizkers no_pixel_fonts homura`` will render... you guessed it,
-   same as before but with the fonts from
-   ``variable_sets/no_pixel_fonts.yaml``
--  ``whizkers -w --watch-command 'xrdb -merge ~/rendered_Xresources' homura``
-   will start a file watcher, so that when any template or variable file
-   change would affect rendering, everything is rerendered and
-   ``xrdb -merge ~/.rendered_Xresources`` is run.
+- ``sanpai`` will render with ``defaults.yaml``
+- ``sanpai homura`` will render with ``defaults.yaml``, but using the
+  colors from ``variable_sets/homura.yaml``
+- ``sanpai no_pixel_fonts homura`` will render... you guessed it,
+  same as before but with the fonts from
+  ``variable_sets/no_pixel_fonts.yaml``
+- Notice the last line in ``~/rendered_Xresources``: it's using a filter to
+  turn a hex color into an RGB tuple!
+- ``sanpai -w --watch-command 'xrdb -merge ~/rendered_Xresources' homura``
+  will start a file watcher, so that when any template or variable file
+  change would affect rendering, everything is rerendered and
+  ``xrdb -merge ~/rendered_Xresources`` is run.
 
-Additional Usage Information
-============================
+Additional Usage Information (courtesy of `fullsalvo`_)
+-------------------------------------------------------
 
-``whizkers`` is a file templater written in python. It uses pystache and yaml as the base for file templating. This means that when you run it, it'll use variables you've assigned to fill in fields in other files you've created templates for. To be exact, whizkers uses the folder ``$HOME/.config/whizkers/templates/`` as a clone of your ``$HOME`` directory. Files within this folder are rewritten, filling in fields of the form ``{{ variable_name }}`` with what ``variable_name`` has been defined as within yaml files. This gives you the power to rewrite configuration files on-the-fly then reload your programs to update apperances almost instantly (or at least that's how I use whizkers). The standard yaml file referenced is ``$HOME/.config/whizkers/defaults.yaml``. Variations you make should be stored in ``$HOME/.config/whizkers/variable_sets/`` (which also allows you to nest folders for better organization).
+``sanpai`` is a file templater written in python. It uses Jinja2 and YAML as
+the base for file templating. This means that when you run it, it'll use
+variables you've assigned to fill in fields in other files you've created
+templates for. To be exact, sanpai uses the folder
+``$HOME/.config/sanpai/templates/`` as a clone of your ``$HOME`` directory.
+Files within this folder are rewritten, filling in fields of the form ``{{
+variable_name }}`` with what ``variable_name`` has been defined as within yaml
+files. This gives you the power to rewrite configuration files on-the-fly then
+reload your programs to update apperances almost instantly (or at least that's
+how I use sanpai). The standard yaml file referenced is
+``$HOME/.config/sanpai/defaults.yaml``. Variations you make should be stored
+in ``$HOME/.config/sanpai/variable_sets/`` (which also allows you to nest
+folders for better organization).
 
-Let's have an example. Say you want to change your files to a theme in a file ``bright.yaml`` in your ``variable_sets`` directory and you have one file in your ``templates`` directory, ``.Xresources``. In ``bright.yaml``, contents might look something like
+Let's have an example. Say you want to change your files to a theme in a file
+``bright.yaml`` in your ``variable_sets`` directory and you have one file in
+your ``templates`` directory, ``.Xresources``. In ``bright.yaml``, contents
+might look something like 
 
 ::
 
@@ -55,79 +73,49 @@ Let's have an example. Say you want to change your files to a theme in a file ``
         normal:       "#A5B9C4"
         bold:         "#F1F2E0"
 
-This is the typical structure for colors used in whizkers. Accessing elements with this can be tricky, but this is something typically handled from within the ``defaults.yaml`` file with a section for convenience, like
-
-::
-
-    bgc:        "{` {{ colors }}['background'] `}"
-    fgc:        "{` {{ colors }}['foreground'] `}"
-    csc:        "{` {{ colors }}['cursor'] `}"
-
-    n_black:    "{` {{ colors }}['black']['normal'] `}"
-    b_black:    "{` {{ colors }}['black']['bold'] `}"
-    n_red:      "{` {{ colors }}['red']['normal'] `}"
-    b_red:      "{` {{ colors }}['red']['bold'] `}"
-    n_green:    "{` {{ colors }}['green']['normal'] `}"
-    b_green:    "{` {{ colors }}['green']['bold'] `}"
-    n_yellow:   "{` {{ colors }}['yellow']['normal'] `}"
-    b_yellow:   "{` {{ colors }}['yellow']['bold'] `}"
-    n_blue:     "{` {{ colors }}['blue']['normal'] `}"
-    b_blue:     "{` {{ colors }}['blue']['bold'] `}"
-    n_magenta:  "{` {{ colors }}['magenta']['normal'] `}"
-    b_magenta:  "{` {{ colors }}['magenta']['bold'] `}"
-    n_cyan:     "{` {{ colors }}['cyan']['normal'] `}"
-    b_cyan:     "{` {{ colors }}['cyan']['bold'] `}"
-    n_white:    "{` {{ colors }}['white']['normal'] `}"
-    b_white:    "{` {{ colors }}['white']['bold'] `}"
-
-    n_primary:  "{` {{ colors }}[{{ colors }}['primary']]['normal'] `}"
-    b_primary:  "{` {{ colors }}[{{ colors }}['primary']]['bold'] `}"
-    n_secondary:  "{` {{ colors }}[{{ colors }}['secondary']]['normal'] `}"
-    b_secondary:  "{` {{ colors }}[{{ colors }}['secondary']]['bold'] `}"
-
+This is the typical structure for colors used in sanpai.
 Anyway, if ``.Xresources`` looks something like
 
 ::
-
     ! Colors
-    *.borderColor:  {{ bgc }}
-    *.background:   {{ bgc }}
-    *.foreground:   {{ fgc }}
-    *.cursorColor:  {{ csc }}
+    URxvt.borderColor:  {{ colors.background }}
+    URxvt.background:   {{ colors.background }}
+    URxvt.foreground:   {{ colors.foreground }}
 
     ! Black
-    *.color0:       {{ n_black }}
-    *.color8:       {{ b_black }}
+    URxvt.color0:       {{ colors.black.normal }}
+    URxvt.color8:       {{ colors.black.bold }}
 
     ! Red
-    *.color1:       {{ n_red }}
-    *.color9:       {{ b_red }}
+    URxvt.color1:       {{ colors.red.normal }}
+    URxvt.color9:       {{ colors.red.bold }}
 
     ! Green
-    *.color2:       {{ n_green }}
-    *.color10:      {{ b_green }}
+    URxvt.color2:       {{ colors.green.normal }}
+    URxvt.color10:      {{ colors.green.bold }}
 
     ! Yellow
-    *.color3:       {{ n_yellow }}
-    *.color11:      {{ b_yellow }}
+    URxvt.color3:       {{ colors.yellow.normal }}
+    URxvt.color11:      {{ colors.yellow.bold }}
 
     ! Blue
-    *.color4:       {{ n_blue }}
-    *.color12:      {{ b_blue }}
+    URxvt.color4:       {{ colors.blue.normal }}
+    URxvt.color12:      {{ colors.blue.bold }}
 
     ! Magenta
-    *.color5:       {{ n_magenta }}
-    *.color13:      {{ b_magenta }}
+    URxvt.color5:       {{ colors.magenta.normal }}
+    URxvt.color13:      {{ colors.magenta.bold }}
 
     ! Cyan
-    *.color6:       {{ n_cyan }}
-    *.color14:      {{ b_cyan }}
+    URxvt.color6:       {{ colors.cyan.normal }}
+    URxvt.color14:      {{ colors.cyan.bold }}
 
     ! White
-    *.color7:       {{ n_white }}
-    *.color15:      {{ b_white }}
+    URxvt.color7:       {{ colors.white.normal }}
+    URxvt.color15:      {{ colors.white.bold }}
 
-Then the ultimately rewritten file from a call of ``whizkers bright`` (whizkers will load from ``defaults.yaml`` unless other yamls are called as arguments by their basename) would be in ``$HOME/.Xresources`` as
+
+Then the ultimately rewritten file from a call of ``sanpai bright`` (sanpai will load from ``defaults.yaml`` unless other yamls are called as arguments by their basename) would be in ``$HOME/.Xresources`` as
 
 ::
 
@@ -169,8 +157,9 @@ Then the ultimately rewritten file from a call of ``whizkers bright`` (whizkers 
     *.color7:       #A5B9C4
     *.color15:      #F1F2E0
 
-This process only rewrites the file, however. If you want functionality with reloading like metakirby5 and fullsalvo have, you need to use scripting, like a script in `wz-utils`_ , ``rhisk``.
+This process only rewrites the file, however. If you want functionality with reloading like metakirby5 and fullsalvo have, you need to use scripting, like a script in `wz-utils`_ , ``rhisk``. This was designed for ``whizkers``, so you'll need to substitute with ``sanpai`` as necessary.
 
-This example is only the tip of the iceberg of what whizkers can be used for. If you want to understand all its power, start messing around with it yourself! Have fun!
+This example is only the tip of the iceberg of what sanpai can be used for. If you want to understand all its power, start messing around with it yourself! Have fun!
 
+.. _fullsalvo: https://github.com/fullsalvo
 .. _wz-utils: https://github.com/fullsalvo/wz-utils
