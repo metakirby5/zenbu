@@ -6,7 +6,10 @@
 A Jinja2 + YAML based config templater.
 
 Searches for an optional yaml file with a variable mapping in
-~/.config/sanpai/variables.yaml,
+~/.config/sanpai/defaults.yaml,
+
+an optional python file with filters in (by default)
+~/.config/sanpai/filters.py,
 
 an optional yaml file with an ignore scalar of regexes in (by default)
 ~/.config/sanpai/ignores.yaml,
@@ -24,7 +27,8 @@ They can either be paths or, if located in (by default)
 extension-less filenames.
 
 Environment variable support is available;
-simply put the name of the variable in Jinja2 brackets.
+simply run with the `-e` flag and
+put the name of the variable in Jinja2 brackets.
 
 Order of precedence is:
 last YAML variable defined >
@@ -222,10 +226,10 @@ class Sanpai:
     def __init__(self,
                  templates_path,
                  dest_path,
-                 filters_path=None,
                  var_set_path=None,
                  use_env_vars=False,
                  variables=None,
+                 filters_path=None,
                  ignores=None,
                  watch_command=None):
 
@@ -259,7 +263,8 @@ class Sanpai:
         self.watch_command = watch_command
 
         # Jinja2
-        self.env = Environment(loader=FileSystemLoader(templates_path))
+        self.env = Environment(loader=FileSystemLoader(templates_path),
+                               cache_size=0)
         self.defaults = {
             'filters': self.env.filters,
             'globals': self.env.globals,
@@ -367,7 +372,7 @@ class Sanpai:
                         path = os.path.join(short_root, name)
 
                         # Yield without .yaml
-                        yield os.splitext(path)[0]
+                        yield os.path.splitext(path)[0]
         else:
             raise ValueError("No variable set path to list from.")
 
@@ -418,7 +423,7 @@ class Sanpai:
                 logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
-        for dest, _, result in self.render():
+        for template, dest, result in self.render():
             try:
                 with codecs.open(dest, 'r', 'utf-8') as f:
                     yield unified_diff(
@@ -539,15 +544,6 @@ def parse_args():
                         type=str,
                         default=HOME)
 
-    parser.add_argument('-f',
-                        help="""
-                        filters file.
-                        Default: %s
-                        """ % SANPAI_FILTERS,
-                        dest='filters',
-                        type=str,
-                        default=SANPAI_FILTERS)
-
     parser.add_argument('-s',
                         help="""
                         variable set directory.
@@ -556,6 +552,15 @@ def parse_args():
                         dest='var_set_dir',
                         type=str,
                         default=SANPAI_VAR_SETS)
+
+    parser.add_argument('-f',
+                        help="""
+                        filters file.
+                        Default: %s
+                        """ % SANPAI_FILTERS,
+                        dest='filters',
+                        type=str,
+                        default=SANPAI_FILTERS)
 
     parser.add_argument('-i',
                         help="""
@@ -641,10 +646,10 @@ def main():
         sanpai = Sanpai(
             args.template_dir,
             args.dest_dir,
-            args.filters,
             args.var_set_dir,
             args.env_vars,
             args.variable_files,
+            args.filters,
             args.ignores_file,
             args.watch_command
         )
