@@ -64,79 +64,81 @@ If you installed via pip, you may need to run the following before autocompletio
 Usage
 -----
 
-usage: sanpai.py [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
-                [-f FILTERS] [-i IGNORES_FILE] [-e] [-w]
-                [--watch-command WATCH_COMMAND] [--diff] [--dry]
-                [variable_files [variable_files ...]]
+::
 
-A Jinja2 + YAML based config templater.
+   usage: sanpai.py [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
+                   [-f FILTERS] [-i IGNORES_FILE] [-e] [-w]
+                   [--watch-command WATCH_COMMAND] [--diff] [--dry]
+                   [variable_files [variable_files ...]]
 
-Searches for an optional yaml file with a variable mapping in
-~/.config/sanpai/defaults.yaml,
+   A Jinja2 + YAML based config templater.
 
-an optional python file with filters in (by default)
-~/.config/sanpai/filters.py,
+   Searches for an optional yaml file with a variable mapping in
+   ~/.config/sanpai/defaults.yaml,
 
-an optional yaml file with an ignore scalar of regexes in (by default)
-~/.config/sanpai/ignores.yaml,
+   an optional python file with filters in (by default)
+   ~/.config/sanpai/filters.py,
 
-and uses the Jinja2 templates in (by default)
-~/.config/sanpai/templates/
+   an optional yaml file with an ignore scalar of regexes in (by default)
+   ~/.config/sanpai/ignores.yaml,
 
-to render into your home directory (by default).
+   and uses the Jinja2 templates in (by default)
+   ~/.config/sanpai/templates/
 
-Additional variable files can be applied
-by supplying them as arguments, in order of application.
+   to render into your home directory (by default).
 
-They can either be paths or, if located in (by default)
-~/.config/sanpai/variable_sets/,
-extension-less filenames.
+   Additional variable files can be applied
+   by supplying them as arguments, in order of application.
 
-Environment variable support is available;
-simply run with the `-e` flag and
-put the name of the variable in Jinja2 brackets.
+   They can either be paths or, if located in (by default)
+   ~/.config/sanpai/variable_sets/,
+   extension-less filenames.
 
-The default Jinja2 globals and filters are available.
+   Environment variable support is available;
+   simply run with the `-e` flag and
+   put the name of the variable in Jinja2 brackets.
 
-Order of precedence is:
-last YAML variable defined >
-first YAML variable defined >
-environment variables.
+   The default Jinja2 globals and filters are available.
 
-Autocomplete support available, but only for the default
-variable set directory.
+   Order of precedence is:
+   last YAML variable defined >
+   first YAML variable defined >
+   environment variables.
 
-A file watcher is available via the -w flag.
-Whenever a variable file in use, the ignores file,
-or a template file changes, the templates are rendered
-if there are any differences.
+   Autocomplete support available, but only for the default
+   variable set directory.
 
-Diffs between the current destination files and
-template renderings are available via the --diff flag.
+   A file watcher is available via the -w flag.
+   Whenever a variable file in use, the ignores file,
+   or a template file changes, the templates are rendered
+   if there are any differences.
 
-positional arguments:
- variable_files        additional variable files
+   Diffs between the current destination files and
+   template renderings are available via the --diff flag.
 
-optional arguments:
- -h, --help            show this help message and exit
- -l                    list variable sets.
- -t TEMPLATE_DIR       template directory. Default:
-                       /Users/echan/.config/sanpai/templates
- -d DEST_DIR           destination directory. Default: /Users/echan
- -s VAR_SET_DIR        variable set directory. Default:
-                       /Users/echan/.config/sanpai/variable_sets
- -f FILTERS            filters file. Default:
-                       /Users/echan/.config/sanpai/filters.py
- -i IGNORES_FILE       ignores file. Default:
-                       /Users/echan/.config/sanpai/ignores.yaml
- -e                    whether or not to use environment variables. Default:
-                       don't use environment variables
- -w                    start file watcher.
- --watch-command WATCH_COMMAND
-                       what to execute when a change occurs. Default: Nothing
- --diff                show diff between template renderings and current
-                       destination files
- --dry                 do a dry run
+   positional arguments:
+    variable_files        additional variable files
+
+   optional arguments:
+    -h, --help            show this help message and exit
+    -l                    list variable sets.
+    -t TEMPLATE_DIR       template directory. Default:
+                          /Users/echan/.config/sanpai/templates
+    -d DEST_DIR           destination directory. Default: /Users/echan
+    -s VAR_SET_DIR        variable set directory. Default:
+                          /Users/echan/.config/sanpai/variable_sets
+    -f FILTERS            filters file. Default:
+                          /Users/echan/.config/sanpai/filters.py
+    -i IGNORES_FILE       ignores file. Default:
+                          /Users/echan/.config/sanpai/ignores.yaml
+    -e                    whether or not to use environment variables. Default:
+                          don't use environment variables
+    -w                    start file watcher.
+    --watch-command WATCH_COMMAND
+                          what to execute when a change occurs. Default: Nothing
+    --diff                show diff between template renderings and current
+                          destination files
+    --dry                 do a dry run
 
 For help on designing templates, refer to
 http://jinja.pocoo.org/docs/dev/templates/
