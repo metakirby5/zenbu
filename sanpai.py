@@ -682,7 +682,7 @@ def main():
 
     elif args.dry:
         logger.warning("Commencing dry run...")
-        for dest, _, _ in sanpai.render():
+        for _, dest, _ in sanpai.render():
             logger.info("Successfully dry rendered \"%s\"" % dest)
 
     elif args.watch:
