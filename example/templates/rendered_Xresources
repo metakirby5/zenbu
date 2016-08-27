@@ -46,3 +46,6 @@ URxvt.color15:      {{ colors.white.bold }}
 
 ! RGB test
 ! {{ colors.red.normal | hex2rgb }}
+
+! Expression test
+! {{ colors[colors.primary]['normal'] }}

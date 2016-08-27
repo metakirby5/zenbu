@@ -269,6 +269,8 @@ class Sanpai:
 
         # Jinja2
         self.env = Environment(loader=FileSystemLoader(templates_path),
+                               keep_trailing_newlines=True,
+                               autoescape=False,
                                cache_size=0)
         self.defaults = {
             'filters': self.env.filters,
