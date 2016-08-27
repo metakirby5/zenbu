@@ -21,10 +21,10 @@ switching?
 - Better logic: Everything from if/else to macros. I originally praised
   Mustache for its logic-less philosophy, but then I realized that there would
   be no place to put logic other than the variable sets, which is a nightmare.
-- Expressions: You can now do ``{{ foo.bar }}``. You can even do
-  ``{{ 1 + 1 }}``. But please don't.
-- Filters: You can now do ``{{ colors.black.bold | hex2rgb }}``.
-- Better whitespace control: This means readable templates.
+- Expressions: You can now do ``{{ ':bold' if use_bold }}``.
+- Filters: You can now do ``{{ colors.black.bold | hex2rgb }}``. A lot better
+  than Mustache's syntax.
+- Better whitespace control: This means increased readability.
 
 Installation
 ------------
@@ -140,8 +140,8 @@ Usage
                           destination files
     --dry                 do a dry run
 
-For help on designing templates, refer to
-http://jinja.pocoo.org/docs/dev/templates/
+    For help on designing templates, refer to
+    http://jinja.pocoo.org/docs/dev/templates/
 
 Thanks to
 ---------
