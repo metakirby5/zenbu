@@ -5,13 +5,13 @@
 A Jinja2 + YAML based config templater.
 
 Searches for an optional yaml file with a variable mapping in
-~/.config/whizkers/variables.yaml,
+~/.config/sanpai/variables.yaml,
 
 an optional yaml file with an ignore scalar of regexes in (by default)
-~/.config/whizkers/ignores.yaml,
+~/.config/sanpai/ignores.yaml,
 
 and uses the Jinja2 templates in (by default)
-~/.config/whizkers/templates/
+~/.config/sanpai/templates/
 
 to render into your home directory (by default).
 
@@ -19,7 +19,7 @@ Additional variable files can be applied
 by supplying them as arguments, in order of application.
 
 They can either be paths or, if located in (by default)
-~/.config/whizkers/variable_sets/,
+~/.config/sanpai/variable_sets/,
 extension-less filenames.
 
 Environment variable support is available;
@@ -68,16 +68,16 @@ HOME = os.getenv('HOME')
 CONFIG_DIR = os.getenv(
     'XDG_CONFIG_HOME',
     os.path.join(HOME, '.config'))
-WHIZKERS_ROOT = os.path.join(
-    CONFIG_DIR, 'whizkers')
-WHIZKERS_DEFAULTS = os.path.join(
-    WHIZKERS_ROOT, 'defaults.yaml')
-WHIZKERS_VAR_SETS = os.path.join(
-    WHIZKERS_ROOT, 'variable_sets')
-WHIZKERS_IGNORES = os.path.join(
-    WHIZKERS_ROOT, 'ignores.yaml')
-WHIZKERS_TEMPLATES = os.path.join(
-    WHIZKERS_ROOT, 'templates')
+SANPAI_ROOT = os.path.join(
+    CONFIG_DIR, 'sanpai')
+SANPAI_DEFAULTS = os.path.join(
+    SANPAI_ROOT, 'defaults.yaml')
+SANPAI_VAR_SETS = os.path.join(
+    SANPAI_ROOT, 'variable_sets')
+SANPAI_IGNORES = os.path.join(
+    SANPAI_ROOT, 'ignores.yaml')
+SANPAI_TEMPLATES = os.path.join(
+    SANPAI_ROOT, 'templates')
 TEMPLATE_EXT = 'yaml'
 WATCH_TIMEOUT = 0.5
 
@@ -92,19 +92,19 @@ def variable_set_completer(prefix, **kwargs):
     # TODO: make this less janky
     DUMMY = '/tmp/'
     try:
-        var_sets = Whizker(
+        var_sets = Sanpai(
             DUMMY,
             DUMMY,
-            WHIZKERS_VAR_SETS,
-            ignores=WHIZKERS_IGNORES,
+            SANPAI_VAR_SETS,
+            ignores=SANPAI_IGNORES,
         ).var_sets
     except NotFoundError as e:
         # Try again with no ignores file
         try:
-            var_sets = Whizker(
+            var_sets = Sanpai(
                 DUMMY,
                 DUMMY,
-                WHIZKERS_VAR_SETS,
+                SANPAI_VAR_SETS,
             ).var_sets
         except NotFoundError as e:
             argcomplete.warn(e)
@@ -209,7 +209,7 @@ class AllEventsHandler(FileSystemEventHandler):
         self.callback(event)
 
 
-class Whizker:
+class Sanpai:
     """
     A template manager.
     """
@@ -484,10 +484,10 @@ def parse_args():
                         help="""
                         template directory.
                         Default: %s
-                        """ % WHIZKERS_TEMPLATES,
+                        """ % SANPAI_TEMPLATES,
                         dest='template_dir',
                         type=str,
-                        default=WHIZKERS_TEMPLATES)
+                        default=SANPAI_TEMPLATES)
 
     parser.add_argument('-d',
                         help="""
@@ -502,19 +502,19 @@ def parse_args():
                         help="""
                         variable set directory.
                         Default: %s
-                        """ % WHIZKERS_VAR_SETS,
+                        """ % SANPAI_VAR_SETS,
                         dest='var_set_dir',
                         type=str,
-                        default=WHIZKERS_VAR_SETS)
+                        default=SANPAI_VAR_SETS)
 
     parser.add_argument('-i',
                         help="""
                         ignores file.
                         Default: %s
-                        """ % WHIZKERS_IGNORES,
+                        """ % SANPAI_IGNORES,
                         dest='ignores_file',
                         type=str,
-                        default=WHIZKERS_IGNORES)
+                        default=SANPAI_IGNORES)
 
     parser.add_argument('-e',
                         help="""
@@ -576,11 +576,11 @@ def main():
     # Defaults on files
     if args.list_var_sets:
         args.variable_files = []
-    elif os.path.isfile(WHIZKERS_DEFAULTS):
-        args.variable_files.insert(0, WHIZKERS_DEFAULTS)
+    elif os.path.isfile(SANPAI_DEFAULTS):
+        args.variable_files.insert(0, SANPAI_DEFAULTS)
     else:
         logger.warn("Default variables file %s not found. Skipping..."
-                    % WHIZKERS_DEFAULTS)
+                    % SANPAI_DEFAULTS)
 
     if not os.path.isfile(args.ignores_file):
         logger.warn("Ignores file %s not found. Skipping..."
@@ -588,7 +588,7 @@ def main():
         args.ignores_file = None
 
     try:
-        whizker = Whizker(
+        sanpai = Sanpai(
             args.template_dir,
             args.dest_dir,
             args.var_set_dir,
@@ -603,7 +603,7 @@ def main():
 
     if args.list_var_sets:
         try:
-            for var_set in whizker.var_sets:
+            for var_set in sanpai.var_sets:
                 print(var_set)
         except ValueError as e:
             logger.critical(e)
@@ -614,28 +614,28 @@ def main():
             ''.join(
                 ''.join(
                     diff_colorify(line) for line in diff
-                ) for diff in whizker.diff()
+                ) for diff in sanpai.diff()
             ),
             cmd='less -R',
         )
 
     elif args.dry:
         logger.warning("Commencing dry run...")
-        for dest, _, _ in whizker.render():
+        for dest, _, _ in sanpai.render():
             logger.info("Successfully dry rendered \"%s\"" % dest)
 
     elif args.watch:
         logger.info("Starting watch...")
-        whizker.watch()
+        sanpai.watch()
         try:
             while True:
                 sleep(1)
         except KeyboardInterrupt:
-            whizker.stop_watch()
-        whizker.join_watch()
+            sanpai.stop_watch()
+        sanpai.join_watch()
 
     else:
-        whizker.render_and_write()
+        sanpai.render_and_write()
 
 if __name__ == '__main__':
     main()
