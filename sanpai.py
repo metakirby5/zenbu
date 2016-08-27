@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 
 """
@@ -50,6 +51,8 @@ import codecs
 import yaml
 import re
 import argcomplete
+from importlib import import_module
+from shutil import copystat
 from subprocess import call, check_output
 from threading import Timer
 from time import sleep
@@ -58,7 +61,8 @@ from pydoc import pipepager # Dangerously undocumented...
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from termcolor import colored
 from colorlog import ColoredFormatter
-from jinja2 import Enviornment, PackageLoader
+from jinja2 import Environment, FileSystemLoader, \
+    TemplateNotFound, UndefinedError
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -74,6 +78,8 @@ SANPAI_DEFAULTS = os.path.join(
     SANPAI_ROOT, 'defaults.yaml')
 SANPAI_VAR_SETS = os.path.join(
     SANPAI_ROOT, 'variable_sets')
+SANPAI_FILTERS = os.path.join(
+    SANPAI_ROOT, 'filters.py')
 SANPAI_IGNORES = os.path.join(
     SANPAI_ROOT, 'ignores.yaml')
 SANPAI_TEMPLATES = os.path.join(
@@ -216,6 +222,7 @@ class Sanpai:
     def __init__(self,
                  templates_path,
                  dest_path,
+                 filters_path=None,
                  var_set_path=None,
                  use_env_vars=False,
                  variables=None,
@@ -226,13 +233,12 @@ class Sanpai:
         self.init_params = locals()             # Save locals for later
         self.watch_paths = set()                # List of paths to watch
 
-        self.observer = Observer()
-        self.watch_command = watch_command
-
         # Check paths
         if os.path.exists(templates_path):
             self.templates_path = templates_path
             self.watch_paths.add(templates_path)
+            self.templates_path_re = re.compile(
+                '^{}/?'.format(templates_path))
         else:
             raise NotFoundError(templates_path, "templates path")
 
@@ -243,28 +249,64 @@ class Sanpai:
 
         if not var_set_path or os.path.exists(var_set_path):
             self.var_set_path = var_set_path
+            self.var_set_path_re = re.compile(
+                '^{}/?'.format(var_set_path or ''))
         else:
             raise NotFoundError(var_set_path, "variable set path")
 
+        # Watchdog
+        self.observer = Observer()
+        self.watch_command = watch_command
+
+        # Jinja2
+        self.env = Environment(loader=FileSystemLoader(templates_path))
+        self.defaults = {
+            'filters': self.env.filters,
+            'globals': self.env.globals,
+        }
+
+        # Filters
+        if filters_path:
+            if os.path.exists(filters_path):
+                sys.path.append(os.path.dirname(filters_path))
+                self.filters_module = os.path.splitext(
+                    os.path.basename(filters_path))[0]
+            else:
+                raise NotFoundError(var_set_path, "variable set path")
+        else:
+            self.filters_module = None
+
         # Initial setup
-        self.env = Environment(loader=PackageLoader('sanpai', templates_path))
-        self.refresh_variables()
+        self.refresh()
 
-    def refresh_variables(self):
-        self.variables = {}             # {variable: value}
-        self.ignores = set()            # Set of regexes
-
-        if self.init_params['use_env_vars']:
-            self.variables.update(dict(os.environ))
-        for name in self.init_params['variables']:
-            self.add_variables(name)
+    def refresh(self):
+        # Get ignores
+        self.ignores = set()
         if self.init_params['ignores']:
             self.add_ignores(self.init_params['ignores'])
+
+        # Get variables
+        self.env.globals = self.defaults['globals'].copy()
+        if self.init_params['use_env_vars']:
+            self.env.globals.update(dict(os.environ))
+        for name in self.init_params['variables']:
+            self.add_variables(name)
+
+        # Get filters
+        self.env.filters = self.defaults['filters'].copy()
+        if self.filters_module:
+            try:
+                deep_update_dict(
+                    self.env.filters,
+                    vars(import_module(self.filters_module)))
+            except ImportError:
+                pass
 
     def add_variables(self, name):
         # If it might be just a name...
         if self.var_set_path and not os.path.exists(name):
-            name = os.path.join(self.var_set_path, '%s.yaml' % name)
+            name = os.path.join(self.var_set_path, '{}.{}'.format(
+                name, TEMPLATE_EXT))
 
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
@@ -277,7 +319,7 @@ class Sanpai:
             self.watch_paths.add(name)
             if isinstance(to_merge, dict):
                 logger.info("Using \"%s\"..." % name)
-                deep_update_dict(self.variables, to_merge)
+                deep_update_dict(self.env.globals, to_merge)
             else:
                 raise ParseError(name, "not in mapping format")
 
@@ -318,14 +360,14 @@ class Sanpai:
                                                 followlinks=True):
 
                 # Don't print the var set dir
-                short_root = re.sub(r'^%s/?' % self.var_set_path, '', root)
+                short_root = self.var_set_path_re.sub('', root)
 
                 for name in files:
                     if not self.should_ignore(name):
                         path = os.path.join(short_root, name)
 
                         # Yield without .yaml
-                        yield re.sub(r'\.%s$' % TEMPLATE_EXT, '', path)
+                        yield os.splitext(path)[0]
         else:
             raise ValueError("No variable set path to list from.")
 
@@ -338,8 +380,7 @@ class Sanpai:
                                             followlinks=True):
 
             # Substitute the template dir for home dir
-            dest_root = re.sub(r'^%s' % self.templates_path,
-                               self.dest_path, root)
+            dest_root = self.templates_path_re.sub(self.dest_path, root)
 
             # Iterate through templates
             for name in files:
@@ -350,21 +391,21 @@ class Sanpai:
 
     def render(self):
         """
-        Yield tuples of (destination file, mode, what to write).
+        Yield tuples of (template file, destination file, what to write).
         If there is a file render error, log it.
         """
         for template, dest in self.render_pairs:
             try:
-                with codecs.open(template, 'r', 'utf-8') as f:
-                    yield (dest, os.stat(template).st_mode,
-                           self.renderer.render(f.read(), self.variables))
-            except KeyNotFoundError as e:
+                # Jinja needs a path from root
+                src = self.templates_path_re.sub('', template)
+                yield (template, dest, self.env.get_template(src).render())
+            except UndefinedError as e:
                 logger.error(RenderError(template, e))
-            except IOError as e:
+            except TemplateNotFound as e:
                 logger.error(NotFoundError(template, e))
 
     def render_and_write(self):
-        for dest, mode, result in self.render():
+        for template, dest, result in self.render():
             # Delete any existing file first
             try:
                 os.remove(dest)
@@ -373,7 +414,7 @@ class Sanpai:
 
             with make_dirs_and_open(dest) as f:
                 f.write(result)
-                os.chmod(dest, mode)
+                copystat(template, dest)
                 logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
@@ -398,7 +439,7 @@ class Sanpai:
         def make_handler(file_to_watch=None):
             def rerender():
                 logger.info("\nRe-rendering...")
-                self.refresh_variables()
+                self.refresh()
 
                 # If there is no resulting difference, skip
                 if deep_iter_empty(self.diff()):
@@ -498,6 +539,15 @@ def parse_args():
                         type=str,
                         default=HOME)
 
+    parser.add_argument('-f',
+                        help="""
+                        filters file.
+                        Default: %s
+                        """ % SANPAI_FILTERS,
+                        dest='filters',
+                        type=str,
+                        default=SANPAI_FILTERS)
+
     parser.add_argument('-s',
                         help="""
                         variable set directory.
@@ -591,6 +641,7 @@ def main():
         sanpai = Sanpai(
             args.template_dir,
             args.dest_dir,
+            args.filters,
             args.var_set_dir,
             args.env_vars,
             args.variable_files,
