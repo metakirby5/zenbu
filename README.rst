@@ -29,7 +29,7 @@ switching?
 - Better whitespace control: This means increased readability.
 
 To help ease the transition to sanpai, there are some resources under
-`migration_`.
+`migration`_.
 
 Installation
 ------------
