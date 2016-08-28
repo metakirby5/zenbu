@@ -77,6 +77,7 @@ This is the typical structure for colors used in sanpai.
 Anyway, if ``.Xresources`` looks something like
 
 ::
+
     ! Colors
     URxvt.borderColor:  {{ colors.background }}
     URxvt.background:   {{ colors.background }}
