@@ -412,8 +412,11 @@ class Sanpai:
                 # Jinja needs a path from root
                 src = self.templates_path_re.sub('', template)
                 yield (template, dest, self.env.get_template(src).render())
-            except (TemplateSyntaxError, UndefinedError) as e:
+            except UndefinedError as e:
                 logger.error(RenderError(template, e))
+            except TemplateSyntaxError as e:
+                logger.error(RenderError(
+                    template, '{} on line {}'.format(e.message, e.lineno)))
             except TemplateNotFound as e:
                 logger.error(NotFoundError(template, e))
 
