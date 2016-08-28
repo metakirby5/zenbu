@@ -37,6 +37,11 @@ last YAML variable defined >
 first YAML variable defined >
 environment variables.
 
+Variables are shallowly resolved once. Thus, for example you may have the
+following in your defaults.yaml for convenience:
+
+n_primary:  "{{ colors[colors.primary].normal }}"
+
 Autocomplete support available, but only for the default
 variable set directory.
 
@@ -296,17 +301,13 @@ class Sanpai:
         self.refresh()
 
     def refresh(self):
+        """
+        Refresh ignores, variables, and filters.
+        """
         # Get ignores
         self.ignores = set()
         if self.init_params['ignores']:
             self.add_ignores(self.init_params['ignores'])
-
-        # Get variables
-        self.env.globals = self.defaults['globals'].copy()
-        if self.init_params['use_env_vars']:
-            self.env.globals.update(dict(os.environ))
-        for name in self.init_params['variables']:
-            self.add_variables(name)
 
         # Get filters
         self.env.filters = self.defaults['filters'].copy()
@@ -318,7 +319,18 @@ class Sanpai:
             except ImportError:
                 pass
 
+        # Get variables
+        self.env.globals = self.defaults['globals'].copy()
+        if self.init_params['use_env_vars']:
+            self.env.globals.update(dict(os.environ))
+        for name in self.init_params['variables']:
+            self.add_variables(name)
+        self.render_variables(self.env.globals)
+
     def add_variables(self, name):
+        """
+        Add variables to the environment.
+        """
         # If it might be just a name...
         if self.var_set_path and not os.path.exists(name):
             name = os.path.join(self.var_set_path, '{}.{}'.format(
@@ -339,7 +351,26 @@ class Sanpai:
             else:
                 raise ParseError(name, "not in mapping format")
 
+    def render_variables(self, vars):
+        """
+        Shallowly resolves variables within variables.
+        """
+        rendered_variables = {}
+        for k, v in vars.iteritems():
+            if isinstance(v, dict):
+                self.render_variables(v)
+            elif isinstance(v, str):
+                try:
+                    vars[k] = self.env.from_string(v).render()
+                except UndefinedError as e:
+                    logger.error(VariableRenderError(k, e))
+                except TemplateSyntaxError as e:
+                    logger.error(VariableRenderError(k, e.message))
+
     def add_ignores(self, name):
+        """
+        Add patterns to the ignore list.
+        """
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
                 to_merge = yaml.load(f.read())
@@ -424,6 +455,9 @@ class Sanpai:
                 logger.error(NotFoundError(template, e))
 
     def render_and_write(self):
+        """
+        Render the templates and write them to their destination.
+        """
         for template, dest, result in self.render():
             # Delete any existing file first
             try:
@@ -437,6 +471,9 @@ class Sanpai:
                 logger.info("Successfully rendered \"%s\"" % dest)
 
     def diff(self):
+        """
+        Yield diffs between each template's render and current file.
+        """
         for template, dest, result in self.render():
             try:
                 with codecs.open(dest, 'r', 'utf-8') as f:
@@ -451,6 +488,9 @@ class Sanpai:
                     % dest]
 
     def watch(self):
+        """
+        Start the file watcher.
+        """
         # Because of read-only closures
         scope = Scope()
         scope.timer = None
@@ -522,9 +562,15 @@ class Sanpai:
         self.observer.start()
 
     def stop_watch(self):
+        """
+        Stop the file watcher.
+        """
         self.observer.stop()
 
     def join_watch(self):
+        """
+        Block until the file watcher exits.
+        """
         self.observer.join()
 
 
@@ -671,6 +717,7 @@ def main():
         logger.critical(e)
         sys.exit(1)
 
+    # -l
     if args.list_var_sets:
         try:
             for var_set in sanpai.var_sets:
@@ -679,6 +726,7 @@ def main():
             logger.critical(e)
             sys.exit(1)
 
+    # --diff
     elif args.diff:
         pipepager(
             ''.join(
@@ -689,11 +737,13 @@ def main():
             cmd='less -R',
         )
 
+    # --dry
     elif args.dry:
         logger.warning("Commencing dry run...")
         for _, dest, _ in sanpai.render():
             logger.info("Successfully dry rendered \"%s\"" % dest)
 
+    # -w
     elif args.watch:
         logger.info("Starting watch...")
         sanpai.watch()
@@ -704,6 +754,7 @@ def main():
             sanpai.stop_watch()
         sanpai.join_watch()
 
+    # Default mode: render and write
     else:
         sanpai.render_and_write()
 
