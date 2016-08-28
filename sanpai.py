@@ -243,7 +243,7 @@ class Sanpai:
                  use_env_vars=False,
                  variables=None,
                  filters_path=None,
-                 ignores=None,
+                 ignores_path=None,
                  watch_command=None):
 
         variables = variables or []             # PyLint W0102
@@ -255,7 +255,7 @@ class Sanpai:
             self.templates_path = templates_path
             self.watch_paths.add(templates_path)
             self.templates_path_re = re.compile(
-                '^{}/?'.format(templates_path))
+                '^{}'.format(templates_path))
         else:
             raise NotFoundError(templates_path, "templates path")
 
@@ -267,7 +267,7 @@ class Sanpai:
         if not var_set_path or os.path.exists(var_set_path):
             self.var_set_path = var_set_path
             self.var_set_path_re = re.compile(
-                '^{}/?'.format(var_set_path or ''))
+                '^{}'.format(var_set_path or ''))
         else:
             raise NotFoundError(var_set_path, "variable set path")
 
@@ -293,7 +293,7 @@ class Sanpai:
                 self.filters_module = os.path.splitext(
                     os.path.basename(filters_path))[0]
             else:
-                raise NotFoundError(var_set_path, "variable set path")
+                raise NotFoundError(filters_path, "filters path")
         else:
             self.filters_module = None
 
@@ -306,8 +306,8 @@ class Sanpai:
         """
         # Get ignores
         self.ignores = set()
-        if self.init_params['ignores']:
-            self.add_ignores(self.init_params['ignores'])
+        if self.init_params['ignores_path']:
+            self.add_ignores(self.init_params['ignores_path'])
 
         # Get filters
         self.env.filters = self.defaults['filters'].copy()
@@ -618,7 +618,7 @@ def parse_args():
                         filters file.
                         Default: %s
                         """ % SANPAI_FILTERS,
-                        dest='filters',
+                        dest='filters_file',
                         type=str,
                         default=SANPAI_FILTERS)
 
@@ -697,6 +697,11 @@ def main():
         logger.warn("Default variables file %s not found. Skipping..."
                     % SANPAI_DEFAULTS)
 
+    if not os.path.isfile(args.filters_file):
+        logger.warn("Filters file %s not found. Skipping..."
+                    % args.filters_file)
+        args.filters_file = None
+
     if not os.path.isfile(args.ignores_file):
         logger.warn("Ignores file %s not found. Skipping..."
                     % args.ignores_file)
@@ -709,7 +714,7 @@ def main():
             args.var_set_dir,
             args.env_vars,
             args.variable_files,
-            args.filters,
+            args.filters_file,
             args.ignores_file,
             args.watch_command
         )
