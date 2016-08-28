@@ -79,6 +79,7 @@ This is the typical structure for colors used in sanpai. Accessing nested elemen
 
     bgc:        "{{ colors.background }}"
     fgc:        "{{ colors.foreground }}"
+    csc:        "{{ colors.cursor }}"
     
     n_black:    "{{ colors.black.normal }}"
     b_black:    "{{ colors.black.bold }}"
@@ -101,52 +102,48 @@ This is the typical structure for colors used in sanpai. Accessing nested elemen
     b_primary:  "{{ colors[colors.primary].bold }}"
     n_secondary:  "{{ colors[colors.secondary].normal }}"
     b_secondary:  "{{ colors[colors.secondary].bold }}"
-    
-    text_primary:         "{{ colors.primary }}"
-    text_secondary:       "{{ colors.secondary }}"
-    ncmpcpp_primary_n:    "{{ colornumbers[colors.primary] + 1 }}"
-    ncmpcpp_secondary_n:  "{{ colornumbers[colors.secondary] + 1 }}"
 
 Anyway, if ``.Xresources`` looks something like
 
 ::
 
     ! Colors
-    URxvt.borderColor:  {{ colors.background }}
-    URxvt.background:   {{ colors.background }}
-    URxvt.foreground:   {{ colors.foreground }}
+    *.borderColor:  {{ bgc }}
+    *.background:   {{ bgc }}
+    *.foreground:   {{ fgc }}
+    *.cursorColor:  {{ csc }}
 
     ! Black
-    URxvt.color0:       {{ colors.black.normal }}
-    URxvt.color8:       {{ colors.black.bold }}
+    *.color0:       {{ n_black }}
+    *.color8:       {{ b_black }}
 
     ! Red
-    URxvt.color1:       {{ colors.red.normal }}
-    URxvt.color9:       {{ colors.red.bold }}
+    *.color1:       {{ n_red }}
+    *.color9:       {{ b_red }}
 
     ! Green
-    URxvt.color2:       {{ colors.green.normal }}
-    URxvt.color10:      {{ colors.green.bold }}
+    *.color2:       {{ n_green }}
+    *.color10:      {{ b_green }}
 
     ! Yellow
-    URxvt.color3:       {{ colors.yellow.normal }}
-    URxvt.color11:      {{ colors.yellow.bold }}
+    *.color3:       {{ n_yellow }}
+    *.color11:      {{ b_yellow }}
 
     ! Blue
-    URxvt.color4:       {{ colors.blue.normal }}
-    URxvt.color12:      {{ colors.blue.bold }}
+    *.color4:       {{ n_blue }}
+    *.color12:      {{ b_blue }}
 
     ! Magenta
-    URxvt.color5:       {{ colors.magenta.normal }}
-    URxvt.color13:      {{ colors.magenta.bold }}
+    *.color5:       {{ n_magenta }}
+    *.color13:      {{ b_magenta }}
 
     ! Cyan
-    URxvt.color6:       {{ colors.cyan.normal }}
-    URxvt.color14:      {{ colors.cyan.bold }}
+    *.color6:       {{ n_cyan }}
+    *.color14:      {{ b_cyan }}
 
     ! White
-    URxvt.color7:       {{ colors.white.normal }}
-    URxvt.color15:      {{ colors.white.bold }}
+    *.color7:       {{ n_white }}
+    *.color15:      {{ b_white }}
 
 
 Then the ultimately rewritten file from a call of ``sanpai bright`` (sanpai will load from ``defaults.yaml`` unless other yamls are called as arguments by their basename) would be in ``$HOME/.Xresources`` as
