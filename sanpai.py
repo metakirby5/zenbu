@@ -269,7 +269,7 @@ class Sanpai:
 
         # Jinja2
         self.env = Environment(loader=FileSystemLoader(templates_path),
-                               keep_trailing_newlines=True,
+                               keep_trailing_newline=True,
                                autoescape=False,
                                cache_size=0)
         self.defaults = {
