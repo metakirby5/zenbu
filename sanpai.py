@@ -71,7 +71,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from termcolor import colored
 from colorlog import ColoredFormatter
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
-    TemplateNotFound, UndefinedError
+     UndefinedError, TemplateSyntaxError, TemplateNotFound
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -412,7 +412,7 @@ class Sanpai:
                 # Jinja needs a path from root
                 src = self.templates_path_re.sub('', template)
                 yield (template, dest, self.env.get_template(src).render())
-            except UndefinedError as e:
+            except (TemplateSyntaxError, UndefinedError) as e:
                 logger.error(RenderError(template, e))
             except TemplateNotFound as e:
                 logger.error(NotFoundError(template, e))
