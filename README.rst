@@ -4,7 +4,7 @@
 
 *visit to a shrine or temple; paying homage at a shrine or temple*
 
-**UNDER CONSTRUCTION**
+**:warning: UNDER CONSTRUCTION :warning:**
 
 `Jinja2`_ + `YAML`_ based config templater.
 
