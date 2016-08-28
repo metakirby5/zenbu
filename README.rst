@@ -38,12 +38,16 @@ Currently, the easiest method of installation is to move ``sanpai.py``
 to somewhere in your ``$PATH``. Be warned, you must install the
 dependencies in the following section manually.
 
+Pip installation coming soon™
+
 Dependencies
 ------------
 
 -  Python (2 or 3)
 
 The below are Python libraries that should be installed via ``pip``.
+Alternatively, if you did ``pip install sanpai``, these should have been
+automatically installed. 
 
 - argcomplete
 - colorlog
