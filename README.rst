@@ -144,6 +144,9 @@ Usage
     For help on designing templates, refer to
     http://jinja.pocoo.org/docs/dev/templates/
 
+    For help on creating filters, refer to
+    http://jinja.pocoo.org/docs/dev/api/#custom-filters
+
 Thanks to
 ---------
 
