@@ -73,7 +73,12 @@ might look something like
         normal:       "#A5B9C4"
         bold:         "#F1F2E0"
 
-This is the typical structure for colors used in sanpai.
+This is the typical structure for colors used in sanpai. Accessing nested elements can be a hassle, but this is something typically handled from within the ``defaults.yaml`` file with a section for convenience, like
+
+::
+
+    TODO
+
 Anyway, if ``.Xresources`` looks something like
 
 ::
