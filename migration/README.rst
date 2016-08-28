@@ -30,6 +30,12 @@ I've found this procedure to be the best way to migrate:
 
 1. Copy ``~/.config/whizkers`` to ``~/.config/sanpai``.
 2. Replace all variables which use eval syntax with the equivalent expression.
+   I used the following sed commands in Vim (your mileage may vary):
+   - ``s/{{ \([^}]*\) }}/\1/g``
+   - ``s/{` \([^`]*\) `}/{{ \1 }}/g``
+   - ``s/\['\([^']*\)']/.\1/g``
+   - ``s/\["\([^"]*\)"]/.\1/g``
+   - ``s/#\([^ ]*\) \([^\/]*\) \/\1/{{ "\2" if \1 else "" }}``
 3. Run sanpai. There will likely be errors due to control flow syntax changes.
 4. Fix any control flow syntax errors.
 5. Repeat from step 4 until there are no errors.
