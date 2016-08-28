@@ -3,7 +3,9 @@ URxvt.font: {% for f in term_fonts -%}
   xft:{{ f }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
 {%- endfor %}
 URxvt.boldfont: {% for f in term_fonts -%}
-  xft:{{ f }}{{ ':bold' if use_bold else '' }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
+  xft:{{ f }}{{
+    ':bold' if use_bold else ''
+  }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
 {%- endfor %}
 URxvt.letterSpace: {{ term_letterspace }}
 
@@ -48,4 +50,4 @@ URxvt.color15:      {{ colors.white.bold }}
 ! {{ colors.red.normal | hex2rgb }}
 
 ! Expression test
-! {{ colors[colors.primary]['normal'] }}
+! {{ colors[colors.primary]['normal'].lstrip('#') }}

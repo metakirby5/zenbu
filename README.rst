@@ -22,10 +22,14 @@ switching?
   Mustache for its logic-less philosophy, but then I realized that there would
   be no place to put logic other than the variable sets, which is a nightmare.
 - Expressions: You can now do ``{{ ':bold' if use_bold else '' }}``. You can
-  even do ``{{ colors[colors.primary]['normal'] }}``.
+  even do ``{{ colors[colors.primary]['normal'] }}``, which has led to the
+  deprecation of shallow evaluation (``{` ... `}`` syntax).
 - Filters: You can now do ``{{ colors.black.bold | hex2rgb }}``. A lot better
   than Mustache's syntax.
 - Better whitespace control: This means increased readability.
+
+To help ease the transition to sanpai, there are some resources under
+`migration_`.
 
 Installation
 ------------
@@ -64,6 +68,8 @@ If you installed via pip, you may need to run the following before autocompletio
 
 Usage
 -----
+
+Check the `example`_ folder for some sample usage!
 
 ::
 
@@ -161,4 +167,6 @@ Thanks to
 .. _Jinja2 Template Designer Documentation:
      http://jinja.pocoo.org/docs/dev/templates/
 .. _whizkers: https://github.com/metakirby5/whizkers
+.. _migration: migration
+.. _example: example
 .. _fullsalvo: https://github.com/fullsalvo
