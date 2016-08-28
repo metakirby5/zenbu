@@ -3,7 +3,7 @@ URxvt.font: {% for f in term_fonts -%}
   xft:{{ f }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
 {%- endfor %}
 URxvt.boldfont: {% for f in term_fonts -%}
-  xft:{{ f }}{{ ':bold' if use_bold }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
+  xft:{{ f }}{{ ':bold' if use_bold else '' }}:pixelsize={{ pixelsize }}:antialias=true:hinting=true,
 {%- endfor %}
 URxvt.letterSpace: {{ term_letterspace }}
 

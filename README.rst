@@ -21,8 +21,8 @@ switching?
 - Better logic: Everything from if/else to macros. I originally praised
   Mustache for its logic-less philosophy, but then I realized that there would
   be no place to put logic other than the variable sets, which is a nightmare.
-- Expressions: You can now do ``{{ ':bold' if use_bold }}``. You can even do
-  ``{{ colors[colors.primary]['normal'] }}``.
+- Expressions: You can now do ``{{ ':bold' if use_bold else '' }}``. You can
+  even do ``{{ colors[colors.primary]['normal'] }}``.
 - Filters: You can now do ``{{ colors.black.bold | hex2rgb }}``. A lot better
   than Mustache's syntax.
 - Better whitespace control: This means increased readability.

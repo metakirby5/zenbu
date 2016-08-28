@@ -70,7 +70,7 @@ from pydoc import pipepager # Dangerously undocumented...
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from termcolor import colored
 from colorlog import ColoredFormatter
-from jinja2 import Environment, FileSystemLoader, \
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
     TemplateNotFound, UndefinedError
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -270,6 +270,7 @@ class Sanpai:
         # Jinja2
         self.env = Environment(loader=FileSystemLoader(templates_path),
                                keep_trailing_newline=True,
+                               undefined=StrictUndefined,
                                autoescape=False,
                                cache_size=0)
         self.defaults = {
