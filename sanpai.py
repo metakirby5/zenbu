@@ -451,6 +451,9 @@ class Sanpai:
             except TemplateSyntaxError as e:
                 logger.error(RenderError(
                     template, '{} on line {}'.format(e.message, e.lineno)))
+            except UnicodeDecodeError as e:
+                logger.error(RenderError(
+                    template, 'This file is probably not text; {}'.format(e)))
             except TemplateNotFound as e:
                 logger.error(NotFoundError(template, e))
 
