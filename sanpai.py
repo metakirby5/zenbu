@@ -119,7 +119,7 @@ def variable_set_completer(prefix, **kwargs):
             DUMMY,
             DUMMY,
             SANPAI_VAR_SETS,
-            ignores=SANPAI_IGNORES,
+            ignores_path=SANPAI_IGNORES,
         ).var_sets
     except NotFoundError as e:
         # Try again with no ignores file
@@ -131,7 +131,7 @@ def variable_set_completer(prefix, **kwargs):
             ).var_sets
         except NotFoundError as e:
             argcomplete.warn(e)
-    except ParseError as e:
+    except Exception as e:
         argcomplete.warn(e)
     else:
         return (v for v in var_sets if v.startswith(prefix))
