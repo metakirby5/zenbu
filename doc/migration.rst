@@ -31,6 +31,7 @@ I've found this procedure to be the best way to migrate:
 1. Copy ``~/.config/whizkers`` to ``~/.config/sanpai``.
 2. Replace all variables which use eval syntax with the equivalent expression.
    I used the following sed commands in Vim (your mileage may vary):
+   
    - ``s/{{ \([^}]*\) }}/\1/g``
    - ``s/{` \([^`]*\) `}/{{ \1 }}/g``
    - ``s/\['\([^']*\)']/.\1/g``
