@@ -267,7 +267,7 @@ class Sanpai:
         if not var_set_path or os.path.exists(var_set_path):
             self.var_set_path = var_set_path
             self.var_set_path_re = re.compile(
-                '^{}'.format(var_set_path or ''))
+                '^{}/?'.format(var_set_path or ''))
         else:
             raise NotFoundError(var_set_path, "variable set path")
 
