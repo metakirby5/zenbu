@@ -29,7 +29,7 @@ switching?
 - Better whitespace control: This means increased readability.
 
 To help ease the transition to sanpai, there are some tips under the
-`migration`_ docs.
+`migration docs`_.
 
 Installation
 ------------
@@ -176,6 +176,6 @@ Thanks to
 .. _Jinja2 Template Designer Documentation:
      http://jinja.pocoo.org/docs/dev/templates/
 .. _whizkers: https://github.com/metakirby5/whizkers
-.. _migration: doc/migration.rst
+.. _migration docs: doc/migration.rst
 .. _example: example
 .. _fullsalvo: https://github.com/fullsalvo
