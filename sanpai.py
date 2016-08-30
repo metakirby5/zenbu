@@ -247,16 +247,16 @@ class Sanpai:
                  ignores_path=None,
                  watch_command=None):
 
-        variables = variables or []             # PyLint W0102
-        self.init_params = locals()             # Save locals for later
-        self.watch_paths = set()                # List of paths to watch
+        self.variables = variables or []  # Variable sets to apply
+        self.use_env_vars = use_env_vars  # Whether or not to use env vars
+        self.watch_paths = set()          # List of paths to watch
 
-        # Check paths
+        # Check required paths
         if os.path.exists(templates_path):
             self.templates_path = templates_path
-            self.watch_paths.add(templates_path)
             self.templates_path_re = re.compile(
                 '^{}'.format(templates_path))
+            self.watch_paths.add(templates_path)
         else:
             raise NotFoundError(templates_path, "templates path")
 
@@ -264,13 +264,6 @@ class Sanpai:
             self.dest_path = dest_path
         else:
             raise NotFoundError(dest_path, "destination path")
-
-        if not var_set_path or os.path.exists(var_set_path):
-            self.var_set_path = var_set_path
-            self.var_set_path_re = re.compile(
-                '^{}/?'.format(var_set_path or ''))
-        else:
-            raise NotFoundError(var_set_path, "variable set path")
 
         # Watchdog
         self.observer = Observer()
@@ -287,16 +280,39 @@ class Sanpai:
             'globals': self.env.globals,
         }
 
+        # Variables
+        if var_set_path:
+            if os.path.exists(var_set_path):
+                self.var_set_path = var_set_path
+                self.var_set_path_re = re.compile(
+                    '^{}/?'.format(var_set_path or ''))
+                self.watch_paths.add(var_set_path)
+            else:
+                raise NotFoundError(var_set_path, "variable set path")
+        else:
+            self.var_set_path = None
+
         # Filters
         if filters_path:
             if os.path.exists(filters_path):
                 sys.path.append(os.path.dirname(filters_path))
                 self.filters_module = os.path.splitext(
                     os.path.basename(filters_path))[0]
+                self.watch_paths.add(filters_path)
             else:
                 raise NotFoundError(filters_path, "filters path")
         else:
             self.filters_module = None
+
+        # Ignores
+        if ignores_path:
+            if os.path.exists(ignores_path):
+                self.ignores_path = ignores_path
+                self.watch_paths.add(ignores_path)
+            else:
+                raise NotFoundError(ignores_path, "ignores file")
+        else:
+            self.ignores_path = None
 
         # Initial setup
         self.refresh()
@@ -307,8 +323,8 @@ class Sanpai:
         """
         # Get ignores
         self.ignores = set()
-        if self.init_params['ignores_path']:
-            self.add_ignores(self.init_params['ignores_path'])
+        if self.ignores_path:
+            self.add_ignores(self.ignores_path)
 
         # Get filters
         self.env.filters = self.defaults['filters'].copy()
@@ -322,9 +338,9 @@ class Sanpai:
 
         # Get variables
         self.env.globals = self.defaults['globals'].copy()
-        if self.init_params['use_env_vars']:
+        if self.use_env_vars:
             self.env.globals.update(dict(os.environ))
-        for name in self.init_params['variables']:
+        for name in self.variables:
             self.add_variables(name)
         self.env.globals = self.render_variables(self.env.globals)
 
@@ -383,8 +399,6 @@ class Sanpai:
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
                 to_merge = yaml.load(f.read())
-        except IOError:
-            raise NotFoundError(name, "ignores file")
         except Exception as e:
             raise ParseError(e, name)
         else:
