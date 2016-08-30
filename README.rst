@@ -188,6 +188,6 @@ Thanks to
 .. _wiki homepage: https://github.com/metakirby5/sanpai/wiki
 .. _migration wiki page: https://github.com/metakirby5/sanpai/wiki/Migration
 .. _common gotchas wiki page:
-    https://github.com/metakirby5/sanpai/wiki/Common-Gotchas
+    https://github.com/metakirby5/sanpai/wiki/Common-gotchas
 .. _example: example
 .. _fullsalvo: https://github.com/fullsalvo
