@@ -325,7 +325,7 @@ class Sanpai:
             self.env.globals.update(dict(os.environ))
         for name in self.init_params['variables']:
             self.add_variables(name)
-        self.render_variables(self.env.globals)
+        self.env.globals = self.render_variables(self.env.globals)
 
     def add_variables(self, name):
         """
@@ -355,18 +355,21 @@ class Sanpai:
         """
         Shallowly resolves variables within variables.
         """
+        rendered = {} # to avoid rendering order problems
         for k, v in vars.iteritems():
             # Recurse
             if isinstance(v, dict):
-                self.render_variables(v)
+                v = self.render_variables(v)
             # Render
             elif isinstance(v, str):
                 try:
-                    vars[k] = self.env.from_string(v).render()
+                    v = self.env.from_string(v).render()
                 except UndefinedError as e:
                     logger.error(VariableRenderError(k, e))
                 except TemplateSyntaxError as e:
                     logger.error(VariableRenderError(k, e.message))
+            rendered[k] = v
+        return rendered
 
     def add_ignores(self, name):
         """
