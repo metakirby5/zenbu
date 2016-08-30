@@ -75,6 +75,8 @@ Usage
 
 Check the `example`_ folder for some sample usage!
 
+For a more detailed explanation, check out the `wiki homepage`_.
+
 For common issues, check the `common gotchas wiki page`_.
 
 ::
@@ -173,11 +175,12 @@ Thanks to
 - `fullsalvo`_ for ideas, opinions, contributing to documentation,
   shilling, and overall being a good guy
 
+.. _whizkers: https://github.com/metakirby5/whizkers
 .. _Jinja2: http://jinja.pocoo.org/
-.. _YAML: http://yaml.org/
 .. _Jinja2 Template Designer Documentation:
     http://jinja.pocoo.org/docs/dev/templates/
-.. _whizkers: https://github.com/metakirby5/whizkers
+.. _YAML: http://yaml.org/
+.. _wiki homepage: https://github.com/metakirby5/sanpai/wiki
 .. _migration wiki page: https://github.com/metakirby5/sanpai/wiki/Migration
 .. _common gotchas wiki page:
     https://github.com/metakirby5/sanpai/wiki/Common-Gotchas
