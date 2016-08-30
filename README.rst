@@ -23,8 +23,8 @@ switching?
   be no place to put logic other than the variable sets, which is a nightmare.
 - Expressions: You can now do ``{{ ':bold' if use_bold else '' }}``. You can
   even do ``{{ colors[colors.primary]['normal'] }}``, which has led to the
-  deprecation of eval (``{` ... `}`` syntax).
-- Filters: You can now do ``{{ colors.black.bold | hex2rgb }}``. A lot better
+  deprecation of the ``{` ... `}`` eval syntax.
+- Filters: You can now do ``{{ colors.black.bold | to_rgb }}``. A lot better
   than Mustache's syntax.
 - Better whitespace control: This means increased readability.
 
