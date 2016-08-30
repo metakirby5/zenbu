@@ -196,7 +196,7 @@ class ParseError(PathException):
     def __str__(self):
         msg = "Could not parse: \"%s\"" % self.path
         if self.message:
-            msg += "\n    (%s)" % self.message
+            msg += "\n%s" % self.message
         return msg
 
 
@@ -342,7 +342,7 @@ class Sanpai:
                 to_merge = yaml.load(f.read())
         except IOError:
             raise NotFoundError(name, "variables file")
-        except yaml.parser.ParserError as e:
+        except Exception as e:
             raise ParseError(name, e)
         else:
             self.watch_paths.add(name)
@@ -350,7 +350,7 @@ class Sanpai:
                 logger.info("Using \"%s\"..." % name)
                 deep_update_dict(self.env.globals, to_merge)
             else:
-                raise ParseError(name, "not in mapping format")
+                raise ParseError(name, "  (not in mapping format)")
 
     def render_variables(self, vars):
         """
@@ -385,14 +385,14 @@ class Sanpai:
                 to_merge = yaml.load(f.read())
         except IOError:
             raise NotFoundError(name, "ignores file")
-        except yaml.parser.ParserError as e:
+        except Exception as e:
             raise ParseError(e, name)
         else:
             self.watch_paths.add(name)
             if isinstance(to_merge, list):
                 self.ignores |= set(re.compile(i) for i in to_merge)
             else:
-                raise ParseError(name, "not in scalar format")
+                raise ParseError(name, "  (not in scalar format)")
 
     def should_ignore(self, name):
         """
