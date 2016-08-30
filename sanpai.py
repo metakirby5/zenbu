@@ -355,10 +355,11 @@ class Sanpai:
         """
         Shallowly resolves variables within variables.
         """
-        rendered_variables = {}
         for k, v in vars.iteritems():
+            # Recurse
             if isinstance(v, dict):
                 self.render_variables(v)
+            # Render
             elif isinstance(v, str):
                 try:
                     vars[k] = self.env.from_string(v).render()
