@@ -68,6 +68,7 @@ import codecs
 import yaml
 import re
 import argcomplete
+import traceback
 from importlib import import_module
 from shutil import copystat
 from subprocess import call, check_output
@@ -359,16 +360,20 @@ class Sanpai:
         for k, v in vars.iteritems():
             # Recurse
             if isinstance(v, dict):
-                v = self.render_variables(v)
+                rendered[k] = self.render_variables(v)
             # Render
             elif isinstance(v, str):
                 try:
-                    v = self.env.from_string(v).render()
+                    rendered[k] = self.env.from_string(v).render()
                 except UndefinedError as e:
                     logger.error(VariableRenderError(k, e))
                 except TemplateSyntaxError as e:
                     logger.error(VariableRenderError(k, e.message))
-            rendered[k] = v
+                # For all other errors in rendering
+                except Exception as e:
+                    logger.error(VariableRenderError(k, e))
+            else:
+                rendered[k] = v
         return rendered
 
     def add_ignores(self, name):
@@ -460,6 +465,12 @@ class Sanpai:
                     template, 'This file is probably not text; {}'.format(e)))
             except TemplateNotFound as e:
                 logger.error(NotFoundError(template, e))
+            # For all other errors in rendering
+            except Exception as e:
+                tb = traceback.extract_tb(sys.exc_info()[-1])[-1]
+                logger.error(RenderError(
+                    template, '{} on line {}: "{}"'.format(
+                        e.message, tb[1], tb[3])))
 
     def render_and_write(self):
         """
