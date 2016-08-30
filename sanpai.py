@@ -729,6 +729,11 @@ def main():
         logger.warn("Default variables file %s not found. Skipping..."
                     % SANPAI_DEFAULTS)
 
+    if not os.path.isdir(args.var_set_dir):
+        logger.warn("Variable sets directory %s not found. Skipping..."
+                    % args.var_set_dir)
+        args.var_set_dir = None
+
     if not os.path.isfile(args.filters_file):
         logger.warn("Filters file %s not found. Skipping..."
                     % args.filters_file)
