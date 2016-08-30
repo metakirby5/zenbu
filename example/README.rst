@@ -80,7 +80,7 @@ This is the typical structure for colors used in sanpai. Accessing nested elemen
     bgc:        "{{ colors.background }}"
     fgc:        "{{ colors.foreground }}"
     csc:        "{{ colors.cursor }}"
-    
+
     n_black:    "{{ colors.black.normal }}"
     b_black:    "{{ colors.black.bold }}"
     n_red:      "{{ colors.red.normal }}"
@@ -97,7 +97,7 @@ This is the typical structure for colors used in sanpai. Accessing nested elemen
     b_cyan:     "{{ colors.cyan.bold }}"
     n_white:    "{{ colors.white.normal }}"
     b_white:    "{{ colors.white.bold }}"
-    
+
     n_primary:  "{{ colors[colors.primary].normal }}"
     b_primary:  "{{ colors[colors.primary].bold }}"
     n_secondary:  "{{ colors[colors.secondary].normal }}"

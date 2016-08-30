@@ -1,3 +1,9 @@
-def hex2rgb(hex):
-    h = hex.lstrip('#')
-    return tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
+import struct
+
+# Hex to X
+
+def nohash(hex):
+  return hex.lstrip('#')
+
+def to_rgb(hex):
+  return struct.unpack('BBB', nohash(hex).decode('hex'))

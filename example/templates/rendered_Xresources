@@ -47,7 +47,7 @@ URxvt.color7:       {{ n_white }}
 URxvt.color15:      {{ b_white }}
 
 ! RGB test
-! {{ n_red | hex2rgb }}
+! {{ n_red | to_rgb }}
 
 ! Expression test
 ! {{ n_primary.lstrip('#') }}
