@@ -46,9 +46,10 @@ Autocomplete support available, but only for the default
 variable set directory.
 
 A file watcher is available via the -w flag.
-Whenever a variable file in use, the ignores file,
+Whenever a variable file in use, the filters file, the ignores file,
 or a template file changes, the templates are rendered
-if there are any differences.
+if there are any differences. This can be overridden with a custom list of
+directories via the --watch-dirs flag.
 
 Diffs between the current destination files and
 template renderings are available via the --diff flag.
@@ -245,7 +246,8 @@ class Sanpai:
                  variables=None,
                  filters_path=None,
                  ignores_path=None,
-                 watch_command=None):
+                 watch_command=None,
+                 watch_dirs=None):
 
         self.variables = variables or []  # Variable sets to apply
         self.use_env_vars = use_env_vars  # Whether or not to use env vars
@@ -313,6 +315,10 @@ class Sanpai:
                 raise NotFoundError(ignores_path, "ignores file")
         else:
             self.ignores_path = None
+
+        # Override watch_paths?
+        if watch_dirs:
+            self.watch_paths = watch_dirs
 
         # Initial setup
         self.refresh()
@@ -564,9 +570,10 @@ class Sanpai:
                 if self.should_ignore(event.src_path):
                     return
 
-                logger.info("\nChange detected: \"%s\" (%s)" %
+                logger.info("Change detected: \"%s\" (%s)" %
                             (event.src_path, event.event_type))
 
+                # Debounce to prevent thrashing
                 if scope.timer:
                     scope.timer.cancel()
                     scope.timer = None
@@ -688,6 +695,14 @@ def parse_args():
                         type=str,
                         default=None).completer = compgen_completer
 
+    parser.add_argument('--watch-dirs',
+                        help="""
+                        override what directories to watch, colon-separated.
+                        Default: Nothing
+                        """,
+                        type=str,
+                        default=None)
+
     parser.add_argument('--diff',
                         help="""
                         show diff between template renderings and current
@@ -753,8 +768,8 @@ def main():
             args.variable_files,
             args.filters_file,
             args.ignores_file,
-            args.watch_command
-        )
+            args.watch_command,
+            set(args.watch_dirs.split(':')) if args.watch_dirs else None)
     except (NotFoundError, ParseError) as e:
         logger.critical(e)
         sys.exit(1)

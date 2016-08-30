@@ -81,10 +81,11 @@ For common issues, check the `common gotchas wiki page`_.
 
 ::
 
-  usage: sanpai.py [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
-                  [-f FILTERS] [-i IGNORES_FILE] [-e] [-w]
-                  [--watch-command WATCH_COMMAND] [--diff] [--dry]
-                  [variable_files [variable_files ...]]
+  usage: sanpai [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
+                [-f FILTERS_FILE] [-i IGNORES_FILE] [-e] [-w]
+                [--watch-command WATCH_COMMAND] [--watch-dirs WATCH_DIRS]
+                [--diff] [--dry]
+                [variable_files [variable_files ...]]
 
   A Jinja2 + YAML based config templater.
 
@@ -129,42 +130,46 @@ For common issues, check the `common gotchas wiki page`_.
   variable set directory.
 
   A file watcher is available via the -w flag.
-  Whenever a variable file in use, the ignores file,
+  Whenever a variable file in use, the filters file, the ignores file,
   or a template file changes, the templates are rendered
-  if there are any differences.
+  if there are any differences. This can be overridden with a custom list of
+  directories via the --watch-dirs flag.
 
   Diffs between the current destination files and
   template renderings are available via the --diff flag.
 
+  For help on designing templates, refer to
+  http://jinja.pocoo.org/docs/dev/templates/
+
+  For help on creating filters, refer to
+  http://jinja.pocoo.org/docs/dev/api/#custom-filters
+
   positional arguments:
-   variable_files        additional variable files
+    variable_files        additional variable files
 
   optional arguments:
-   -h, --help            show this help message and exit
-   -l                    list variable sets.
-   -t TEMPLATE_DIR       template directory. Default:
-                         /Users/echan/.config/sanpai/templates
-   -d DEST_DIR           destination directory. Default: /Users/echan
-   -s VAR_SET_DIR        variable set directory. Default:
-                         /Users/echan/.config/sanpai/variable_sets
-   -f FILTERS            filters file. Default:
-                         /Users/echan/.config/sanpai/filters.py
-   -i IGNORES_FILE       ignores file. Default:
-                         /Users/echan/.config/sanpai/ignores.yaml
-   -e                    whether or not to use environment variables. Default:
-                         don't use environment variables
-   -w                    start file watcher.
-   --watch-command WATCH_COMMAND
-                         what to execute when a change occurs. Default: Nothing
-   --diff                show diff between template renderings and current
-                         destination files
-   --dry                 do a dry run
-
-   For help on designing templates, refer to
-   http://jinja.pocoo.org/docs/dev/templates/
-
-   For help on creating filters, refer to
-   http://jinja.pocoo.org/docs/dev/api/#custom-filters
+    -h, --help            show this help message and exit
+    -l                    list variable sets.
+    -t TEMPLATE_DIR       template directory. Default:
+                          /Users/echan/.config/sanpai/templates
+    -d DEST_DIR           destination directory. Default: /Users/echan
+    -s VAR_SET_DIR        variable set directory. Default:
+                          /Users/echan/.config/sanpai/variable_sets
+    -f FILTERS_FILE       filters file. Default:
+                          /Users/echan/.config/sanpai/filters.py
+    -i IGNORES_FILE       ignores file. Default:
+                          /Users/echan/.config/sanpai/ignores.yaml
+    -e                    whether or not to use environment variables. Default:
+                          don't use environment variables
+    -w                    start file watcher.
+    --watch-command WATCH_COMMAND
+                          what to execute when a change occurs. Default: Nothing
+    --watch-dirs WATCH_DIRS
+                          override what directories to watch, colon-separated.
+                          Default: Nothing
+    --diff                show diff between template renderings and current
+                          destination files
+    --dry                 do a dry run
 
 Thanks to
 ---------
