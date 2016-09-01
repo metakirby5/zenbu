@@ -1,12 +1,10 @@
-===============
- sanpai (参拝)
-===============
-
-*visit to a shrine or temple; paying homage at a shrine or temple*
+==============
+ zenbu (全部)
+==============
 
 **:warning: UNDER CONSTRUCTION :warning:**
 
-`Jinja2`_ + `YAML`_ based config templater.
+Use `Jinja2`_ and `YAML`_ to theme *everything*.
 
 What happened to whizkers?
 --------------------------
@@ -28,13 +26,13 @@ switching?
   than Mustache's syntax.
 - Better whitespace control: This means increased readability.
 
-To help ease the transition to sanpai, there are some tips under the
+To help ease the transition to zenbu, there are some tips under the
 `migration wiki page`_.
 
 Installation
 ------------
 
-Currently, the easiest method of installation is to move ``sanpai.py``
+Currently, the easiest method of installation is to move ``zenbu.py``
 to somewhere in your ``$PATH``. Be warned, you must install the
 dependencies in the following section manually.
 
@@ -46,7 +44,7 @@ Dependencies
 -  Python (2 or 3)
 
 The below are Python libraries that should be installed via ``pip``.
-Alternatively, if you did ``pip install sanpai``, these should have been
+Alternatively, if you did ``pip install zenbu``, these should have been
 automatically installed. 
 
 - argcomplete
@@ -68,7 +66,7 @@ If you installed via pip, you may need to run the following before autocompletio
 
 ::
 
-  grep 'PYTHON_ARGCOMPLETE_OK' "$(which sanpai)" &>/dev/null || sudo sed -i "1a # PYTHON_ARGCOMPLETE_OK" "$(which sanpai)"
+  grep 'PYTHON_ARGCOMPLETE_OK' "$(which zenbu)" &>/dev/null || sudo sed -i "1a # PYTHON_ARGCOMPLETE_OK" "$(which zenbu)"
 
 Usage
 -----
@@ -81,25 +79,25 @@ For common issues, check the `common gotchas wiki page`_.
 
 ::
 
-  usage: sanpai [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
-                [-f FILTERS_FILE] [-i IGNORES_FILE] [-e] [-w]
-                [--watch-command WATCH_COMMAND] [--watch-dirs WATCH_DIRS]
-                [--diff] [--dry]
-                [variable_files [variable_files ...]]
+  usage: zenbu [-h] [-l] [-t TEMPLATE_DIR] [-d DEST_DIR] [-s VAR_SET_DIR]
+               [-f FILTERS_FILE] [-i IGNORES_FILE] [-e] [-w]
+               [--watch-command WATCH_COMMAND] [--watch-dirs WATCH_DIRS]
+               [--diff] [--dry]
+               [variable_files [variable_files ...]]
 
   A Jinja2 + YAML based config templater.
 
   Searches for an optional yaml file with a variable mapping in
-  ~/.config/sanpai/defaults.yaml,
+  ~/.config/zenbu/defaults.yaml,
 
   an optional python file with filters in (by default)
-  ~/.config/sanpai/filters.py,
+  ~/.config/zenbu/filters.py,
 
   an optional yaml file with an ignore scalar of regexes in (by default)
-  ~/.config/sanpai/ignores.yaml,
+  ~/.config/zenbu/ignores.yaml,
 
   and uses the Jinja2 templates in (by default)
-  ~/.config/sanpai/templates/
+  ~/.config/zenbu/templates/
 
   to render into your home directory (by default).
 
@@ -107,7 +105,7 @@ For common issues, check the `common gotchas wiki page`_.
   by supplying them as arguments, in order of application.
 
   They can either be paths or, if located in (by default)
-  ~/.config/sanpai/variable_sets/,
+  ~/.config/zenbu/variable_sets/,
   extension-less filenames.
 
   Environment variable support is available;
@@ -151,14 +149,14 @@ For common issues, check the `common gotchas wiki page`_.
     -h, --help            show this help message and exit
     -l                    list variable sets.
     -t TEMPLATE_DIR       template directory. Default:
-                          /Users/echan/.config/sanpai/templates
+                          /Users/echan/.config/zenbu/templates
     -d DEST_DIR           destination directory. Default: /Users/echan
     -s VAR_SET_DIR        variable set directory. Default:
-                          /Users/echan/.config/sanpai/variable_sets
+                          /Users/echan/.config/zenbu/variable_sets
     -f FILTERS_FILE       filters file. Default:
-                          /Users/echan/.config/sanpai/filters.py
+                          /Users/echan/.config/zenbu/filters.py
     -i IGNORES_FILE       ignores file. Default:
-                          /Users/echan/.config/sanpai/ignores.yaml
+                          /Users/echan/.config/zenbu/ignores.yaml
     -e                    whether or not to use environment variables. Default:
                           don't use environment variables
     -w                    start file watcher.
@@ -170,6 +168,7 @@ For common issues, check the `common gotchas wiki page`_.
     --diff                show diff between template renderings and current
                           destination files
     --dry                 do a dry run
+
 
 Thanks to
 ---------
@@ -185,9 +184,9 @@ Thanks to
 .. _Jinja2 Template Designer Documentation:
     http://jinja.pocoo.org/docs/dev/templates/
 .. _YAML: http://yaml.org/
-.. _wiki homepage: https://github.com/metakirby5/sanpai/wiki
-.. _migration wiki page: https://github.com/metakirby5/sanpai/wiki/Migration
+.. _wiki homepage: https://github.com/metakirby5/zenbu/wiki
+.. _migration wiki page: https://github.com/metakirby5/zenbu/wiki/Migration
 .. _common gotchas wiki page:
-    https://github.com/metakirby5/sanpai/wiki/Common-gotchas
+    https://github.com/metakirby5/zenbu/wiki/Common-gotchas
 .. _example: example
 .. _fullsalvo: https://github.com/fullsalvo

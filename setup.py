@@ -10,11 +10,11 @@ with codecs.open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='sanpai',
+    name='zenbu',
     version='0.0.0',
     description='Jinja2 + YAML based config templater.',
     long_description=long_description,
-    url='https://github.com/metakirby5/sanpai',
+    url='https://github.com/metakirby5/zenbu',
     author='Ethan Chan',
     author_email='metakirby5@gmail.com',
     license='MIT',
@@ -30,8 +30,8 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
-    keywords='sanpai config templater jinja2 yaml',
-    py_modules=['sanpai'],
+    keywords='zenbu config templater jinja2 yaml',
+    py_modules=['zenbu'],
     install_requires=[
         'argcomplete',
         'colorlog',
@@ -42,7 +42,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'sanpai=sanpai:main',
+            'zenbu=zenbu:main',
         ],
     },
 )

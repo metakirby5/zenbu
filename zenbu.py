@@ -6,16 +6,16 @@
 A Jinja2 + YAML based config templater.
 
 Searches for an optional yaml file with a variable mapping in
-~/.config/sanpai/defaults.yaml,
+~/.config/zenbu/defaults.yaml,
 
 an optional python file with filters in (by default)
-~/.config/sanpai/filters.py,
+~/.config/zenbu/filters.py,
 
 an optional yaml file with an ignore scalar of regexes in (by default)
-~/.config/sanpai/ignores.yaml,
+~/.config/zenbu/ignores.yaml,
 
 and uses the Jinja2 templates in (by default)
-~/.config/sanpai/templates/
+~/.config/zenbu/templates/
 
 to render into your home directory (by default).
 
@@ -23,7 +23,7 @@ Additional variable files can be applied
 by supplying them as arguments, in order of application.
 
 They can either be paths or, if located in (by default)
-~/.config/sanpai/variable_sets/,
+~/.config/zenbu/variable_sets/,
 extension-less filenames.
 
 Environment variable support is available;
@@ -91,18 +91,18 @@ HOME = os.getenv('HOME')
 CONFIG_DIR = os.getenv(
     'XDG_CONFIG_HOME',
     os.path.join(HOME, '.config'))
-SANPAI_ROOT = os.path.join(
-    CONFIG_DIR, 'sanpai')
-SANPAI_DEFAULTS = os.path.join(
-    SANPAI_ROOT, 'defaults.yaml')
-SANPAI_VAR_SETS = os.path.join(
-    SANPAI_ROOT, 'variable_sets')
-SANPAI_FILTERS = os.path.join(
-    SANPAI_ROOT, 'filters.py')
-SANPAI_IGNORES = os.path.join(
-    SANPAI_ROOT, 'ignores.yaml')
-SANPAI_TEMPLATES = os.path.join(
-    SANPAI_ROOT, 'templates')
+ZENBU_ROOT = os.path.join(
+    CONFIG_DIR, 'zenbu')
+ZENBU_DEFAULTS = os.path.join(
+    ZENBU_ROOT, 'defaults.yaml')
+ZENBU_VAR_SETS = os.path.join(
+    ZENBU_ROOT, 'variable_sets')
+ZENBU_FILTERS = os.path.join(
+    ZENBU_ROOT, 'filters.py')
+ZENBU_IGNORES = os.path.join(
+    ZENBU_ROOT, 'ignores.yaml')
+ZENBU_TEMPLATES = os.path.join(
+    ZENBU_ROOT, 'templates')
 TEMPLATE_EXT = 'yaml'
 WATCH_TIMEOUT = 0.5
 
@@ -117,19 +117,19 @@ def variable_set_completer(prefix, **kwargs):
     # TODO: make this less janky
     DUMMY = '/tmp/'
     try:
-        var_sets = Sanpai(
+        var_sets = Zenbu(
             DUMMY,
             DUMMY,
-            SANPAI_VAR_SETS,
-            ignores_path=SANPAI_IGNORES,
+            ZENBU_VAR_SETS,
+            ignores_path=ZENBU_IGNORES,
         ).var_sets
     except NotFoundError as e:
         # Try again with no ignores file
         try:
-            var_sets = Sanpai(
+            var_sets = Zenbu(
                 DUMMY,
                 DUMMY,
-                SANPAI_VAR_SETS,
+                ZENBU_VAR_SETS,
             ).var_sets
         except NotFoundError as e:
             argcomplete.warn(e)
@@ -234,7 +234,7 @@ class AllEventsHandler(FileSystemEventHandler):
         self.callback(event)
 
 
-class Sanpai:
+class Zenbu:
     """
     A template manager.
     """
@@ -629,10 +629,10 @@ def parse_args():
                         help="""
                         template directory.
                         Default: %s
-                        """ % SANPAI_TEMPLATES,
+                        """ % ZENBU_TEMPLATES,
                         dest='template_dir',
                         type=str,
-                        default=SANPAI_TEMPLATES)
+                        default=ZENBU_TEMPLATES)
 
     parser.add_argument('-d',
                         help="""
@@ -647,28 +647,28 @@ def parse_args():
                         help="""
                         variable set directory.
                         Default: %s
-                        """ % SANPAI_VAR_SETS,
+                        """ % ZENBU_VAR_SETS,
                         dest='var_set_dir',
                         type=str,
-                        default=SANPAI_VAR_SETS)
+                        default=ZENBU_VAR_SETS)
 
     parser.add_argument('-f',
                         help="""
                         filters file.
                         Default: %s
-                        """ % SANPAI_FILTERS,
+                        """ % ZENBU_FILTERS,
                         dest='filters_file',
                         type=str,
-                        default=SANPAI_FILTERS)
+                        default=ZENBU_FILTERS)
 
     parser.add_argument('-i',
                         help="""
                         ignores file.
                         Default: %s
-                        """ % SANPAI_IGNORES,
+                        """ % ZENBU_IGNORES,
                         dest='ignores_file',
                         type=str,
-                        default=SANPAI_IGNORES)
+                        default=ZENBU_IGNORES)
 
     parser.add_argument('-e',
                         help="""
@@ -738,11 +738,11 @@ def main():
     # Defaults on files
     if args.list_var_sets:
         args.variable_files = []
-    elif os.path.isfile(SANPAI_DEFAULTS):
-        args.variable_files.insert(0, SANPAI_DEFAULTS)
+    elif os.path.isfile(ZENBU_DEFAULTS):
+        args.variable_files.insert(0, ZENBU_DEFAULTS)
     else:
         logger.warn("Default variables file %s not found. Skipping..."
-                    % SANPAI_DEFAULTS)
+                    % ZENBU_DEFAULTS)
 
     if not os.path.isdir(args.var_set_dir):
         logger.warn("Variable sets directory %s not found. Skipping..."
@@ -760,7 +760,7 @@ def main():
         args.ignores_file = None
 
     try:
-        sanpai = Sanpai(
+        zenbu = Zenbu(
             args.template_dir,
             args.dest_dir,
             args.var_set_dir,
@@ -777,7 +777,7 @@ def main():
     # -l
     if args.list_var_sets:
         try:
-            for var_set in sanpai.var_sets:
+            for var_set in zenbu.var_sets:
                 print(var_set)
         except ValueError as e:
             logger.critical(e)
@@ -789,7 +789,7 @@ def main():
             ''.join(
                 ''.join(
                     diff_colorify(line) for line in diff
-                ) for diff in sanpai.diff()
+                ) for diff in zenbu.diff()
             ),
             cmd='less -R',
         )
@@ -797,23 +797,23 @@ def main():
     # --dry
     elif args.dry:
         logger.warning("Commencing dry run...")
-        for _, dest, _ in sanpai.render():
+        for _, dest, _ in zenbu.render():
             logger.info("Successfully dry rendered \"%s\"" % dest)
 
     # -w
     elif args.watch:
         logger.info("Starting watch...")
-        sanpai.watch()
+        zenbu.watch()
         try:
             while True:
                 sleep(1)
         except KeyboardInterrupt:
-            sanpai.stop_watch()
-        sanpai.join_watch()
+            zenbu.stop_watch()
+        zenbu.join_watch()
 
     # Default mode: render and write
     else:
-        sanpai.render_and_write()
+        zenbu.render_and_write()
 
 if __name__ == '__main__':
     main()
