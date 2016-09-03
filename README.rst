@@ -2,41 +2,18 @@
  zenbu (全部)
 ==============
 
-**:warning: UNDER CONSTRUCTION :warning:**
-
 Use `Jinja2`_ and `YAML`_ to theme *everything*.
-
-What happened to whizkers?
---------------------------
-
-This project may seem awfully similar to `whizkers`_; in fact, this is a fork
-of whizkers which swaps the Mustache backend out with Jinja2. I'm keeping
-whizkers around for compatibility reasons. So what are the reasons for
-switching?
-
-- Comprehensive documentation: See the
-  `Jinja2 Template Designer Documentation`_.
-- Better logic: Everything from if/else to macros. I originally praised
-  Mustache for its logic-less philosophy, but then I realized that there would
-  be no place to put logic other than the variable sets, which is a nightmare.
-- Expressions: You can now do ``{{ ':bold' if use_bold else '' }}``. You can
-  even do ``{{ colors[colors.primary]['normal'] }}``, which has led to the
-  deprecation of the ``{` ... `}`` eval syntax.
-- Filters: You can now do ``{{ colors.black.bold | to_rgb }}``. A lot better
-  than Mustache's syntax.
-- Better whitespace control: This means increased readability.
-
-To help ease the transition to zenbu, there are some tips under the
-`migration wiki page`_.
 
 Installation
 ------------
 
-Currently, the easiest method of installation is to move ``zenbu.py``
-to somewhere in your ``$PATH``. Be warned, you must install the
-dependencies in the following section manually.
+::
 
-Pip installation coming soon™
+   pip install zenbu
+
+or just move ``zenbu.py`` to somewhere in your ``$PATH``.
+If you do the latter, you must install the dependencies in the
+following section manually.
 
 Dependencies
 ------------
@@ -169,6 +146,28 @@ For common issues, check the `common gotchas wiki page`_.
                           destination files
     --dry                 do a dry run
 
+What happened to whizkers?
+--------------------------
+
+This project may seem awfully similar to `whizkers`_; in fact, this is a fork
+of whizkers which swaps the Mustache backend out with Jinja2. I'm keeping
+whizkers around for compatibility reasons. So what are the reasons for
+switching?
+
+- Comprehensive documentation: See the
+  `Jinja2 Template Designer Documentation`_.
+- Better logic: Everything from if/else to macros. I originally praised
+  Mustache for its logic-less philosophy, but then I realized that there would
+  be no place to put logic other than the variable sets, which is a nightmare.
+- Expressions: You can now do ``{{ ':bold' if use_bold else '' }}``. You can
+  even do ``{{ colors[colors.primary]['normal'] }}``, which has led to the
+  deprecation of the ``{` ... `}`` eval syntax.
+- Filters: You can now do ``{{ colors.black.bold | to_rgb }}``. A lot better
+  than Mustache's syntax.
+- Better whitespace control: This means increased readability.
+
+To help ease the transition to zenbu, there are some tips under the
+`migration wiki page`_.
 
 Thanks to
 ---------
