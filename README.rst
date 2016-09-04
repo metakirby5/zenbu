@@ -2,7 +2,11 @@
  zenbu (全部)
 ==============
 
+|Sample Usage|
+
 Use `Jinja2`_ and `YAML`_ to theme *everything*.
+
+The above gif was brought to you by `wzb-utils`_.
 
 Installation
 ------------
@@ -53,6 +57,8 @@ Check the `example`_ folder for some sample usage!
 For a more detailed explanation, check out the `wiki homepage`_.
 
 For common issues, check the `common gotchas wiki page`_.
+
+For some neat tools (including automatic desktop reloads), check the `tools wiki page`_.
 
 ::
 
@@ -175,9 +181,13 @@ Thanks to
 - https://gist.github.com/coleifer/33484bff21c34644dae1
 - http://jinja.pocoo.org/
 - http://pyyaml.org/
-- `fullsalvo`_ for ideas, opinions, contributing to documentation,
+- `fullsalvo`_ for ideas, opinions, the readme gif, contributing to documentation,
   shilling, and overall being a good guy
 
+.. |Sample Usage| image:: http://i.imgur.com/auBfvx0.gif
+   :target: https://u.teknik.io/FUkHM.webm
+   :alt: zenbu with fullsalvo's wzb-utils.
+.. _wzb-utils: https://github.com/fullsalvo/wzb-utils
 .. _whizkers: https://github.com/metakirby5/whizkers
 .. _Jinja2: http://jinja.pocoo.org/
 .. _Jinja2 Template Designer Documentation:
@@ -187,5 +197,7 @@ Thanks to
 .. _migration wiki page: https://github.com/metakirby5/zenbu/wiki/Migration
 .. _common gotchas wiki page:
     https://github.com/metakirby5/zenbu/wiki/Common-gotchas
+.. _tools wiki page:
+    https://github.com/metakirby5/zenbu/wiki/Tools
 .. _example: example
 .. _fullsalvo: https://github.com/fullsalvo
