@@ -1,6 +1,6 @@
 argcomplete
 colorlog
-jinja2
-pyyaml
+Jinja2
+PyYAML
 termcolor
 watchdog
