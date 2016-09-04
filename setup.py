@@ -19,7 +19,7 @@ setup(
     author_email='metakirby5@gmail.com',
     license='MIT',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
         'Topic :: Utilities',
@@ -35,7 +35,7 @@ setup(
     install_requires=[
         'argcomplete',
         'colorlog',
-        'jinja2',
+        'Jinja2',
         'PyYAML',
         'termcolor',
         'watchdog',
