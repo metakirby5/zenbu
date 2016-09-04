@@ -26,7 +26,7 @@ Dependencies
 
 The below are Python libraries that should be installed via ``pip``.
 Alternatively, if you did ``pip install zenbu``, these should have been
-automatically installed. 
+automatically installed.
 
 - argcomplete
 - colorlog
@@ -58,7 +58,8 @@ For a more detailed explanation, check out the `wiki homepage`_.
 
 For common issues, check the `common gotchas wiki page`_.
 
-For some neat tools (including automatic desktop reloads), check the `tools wiki page`_.
+For some neat tools (including automatic desktop reloads), check the
+`tools wiki page`_.
 
 ::
 
