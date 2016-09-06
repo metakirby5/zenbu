@@ -153,6 +153,11 @@ For some neat tools (including automatic desktop reloads), check the
                           destination files
     --dry                 do a dry run
 
+Zenbu in the wild
+-----------------
+
+|enju|
+
 What happened to whizkers?
 --------------------------
 
@@ -188,6 +193,9 @@ Thanks to
 .. |Sample Usage| image:: http://i.imgur.com/auBfvx0.gif
    :target: https://u.teknik.io/FUkHM.webm
    :alt: zenbu with fullsalvo's wzb-utils.
+.. |enju| image:: http://i.imgur.com/EkT9OY5.gif
+   :target: http://asator.xyz/img/dad9.webm
+   :alt: enju on 2bwm.
 .. _wzb-utils: https://github.com/fullsalvo/wzb-utils
 .. _whizkers: https://github.com/metakirby5/whizkers
 .. _Jinja2: http://jinja.pocoo.org/
