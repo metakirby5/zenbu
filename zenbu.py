@@ -151,18 +151,18 @@ def make_dirs_and_open(path):
 
 def diff_colorify(line):
     if re.match(r'^(===|---|\+\+\+|@@)', line):
-        return colored(line.encode('utf-8'), attrs=['bold'])
+        return colored(line, attrs=['bold'])
     elif re.match(r'^\+', line):
-        return colored(line.encode('utf-8'), 'green')
+        return colored(line, 'green')
     elif re.match(r'^-', line):
-        return colored(line.encode('utf-8'), 'red')
+        return colored(line, 'red')
     elif re.match(r'^\?', line):
-        return colored(line.encode('utf-8'), 'yellow')
+        return colored(line, 'yellow')
     else:
-        return line.encode('utf-8')
+        return line
 
 def deep_update_dict(d, u):
-    for k, v in iter(u.items()):
+    for k, v in u.items():
         if isinstance(d, collections.Mapping):
             if isinstance(v, collections.Mapping):
                 r = deep_update_dict(d.get(k, {}), v)
@@ -379,7 +379,7 @@ class Zenbu:
         Shallowly resolves variables within variables.
         """
         rendered = {} # to avoid rendering order problems
-        for k, v in vars.iteritems():
+        for k, v in vars.items():
             # Recurse
             if isinstance(v, dict):
                 rendered[k] = self.render_variables(v)
@@ -489,8 +489,8 @@ class Zenbu:
             except Exception as e:
                 tb = traceback.extract_tb(sys.exc_info()[-1])[-1]
                 logger.error(RenderError(
-                    template, '{} on line {}: "{}"'.format(
-                        e.message, tb[1], tb[3])))
+                    template, '{} at {}:{}: "{}"'.format(
+                        e, tb[0], tb[1], tb[3])))
 
     def render_and_write(self):
         """
