@@ -4,7 +4,8 @@
 
 |Sample Usage|
 
-Use `Jinja2`_ and `YAML`_ to theme *everything*.
+A setup-agnostic cascading theme engine. Uses Jinja2 for templates and YAML
+for variable definition.
 
 The above gif was brought to you by `wzb-utils`_.
 
