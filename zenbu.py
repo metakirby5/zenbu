@@ -173,9 +173,6 @@ def deep_update_dict(d, u):
             d = {k: u[k]}
     return d
 
-def deep_iter_empty(l):
-    return hasattr(l, '__iter__') and all(map(deep_iter_empty, l))
-
 
 # Exceptions
 class PathException(Exception):
@@ -539,7 +536,7 @@ class Zenbu:
                 self.refresh()
 
                 # If there is no resulting difference, skip
-                if deep_iter_empty(self.diff()):
+                if not sum(sum(len(d) for d in diff) for diff in self.diff()):
                     logger.info("\nNo difference detected - skipping")
                     return
 
