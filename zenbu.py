@@ -453,7 +453,9 @@ class Zenbu:
                                             followlinks=True):
 
             # Substitute the template dir for home dir
-            dest_root = self.templates_path_re.sub(self.dest_path, root)
+            dest_root = os.path.join(
+                self.dest_path,
+                self.templates_path_re.sub('', root))
 
             # Iterate through templates
             for name in files:
