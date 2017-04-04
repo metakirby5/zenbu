@@ -252,15 +252,15 @@ class Zenbu:
 
         # Check required paths
         if os.path.exists(templates_path):
-            self.templates_path = templates_path
+            self.templates_path = os.path.abspath(templates_path)
             self.templates_path_re = re.compile(
-                '^{}'.format(templates_path))
-            self.watch_paths.add(templates_path)
+                '^{}{}?'.format(self.templates_path, os.sep))
+            self.watch_paths.add(self.templates_path)
         else:
             raise NotFoundError(templates_path, "templates path")
 
         if os.path.exists(dest_path):
-            self.dest_path = dest_path
+            self.dest_path = os.path.abspath(dest_path)
         else:
             raise NotFoundError(dest_path, "destination path")
 
@@ -269,7 +269,7 @@ class Zenbu:
         self.watch_command = watch_command
 
         # Jinja2
-        self.env = Environment(loader=FileSystemLoader(templates_path),
+        self.env = Environment(loader=FileSystemLoader(self.templates_path),
                                keep_trailing_newline=True,
                                undefined=StrictUndefined,
                                autoescape=False,
@@ -282,10 +282,10 @@ class Zenbu:
         # Variables
         if var_set_path:
             if os.path.exists(var_set_path):
-                self.var_set_path = var_set_path
+                self.var_set_path = os.path.abspath(var_set_path)
                 self.var_set_path_re = re.compile(
-                    '^{}/?'.format(var_set_path or ''))
-                self.watch_paths.add(var_set_path)
+                    '^{}{}?'.format(self.var_set_path, os.sep))
+                self.watch_paths.add(self.var_set_path)
             else:
                 raise NotFoundError(var_set_path, "variable set path")
         else:
@@ -294,6 +294,7 @@ class Zenbu:
         # Filters
         if filters_path:
             if os.path.exists(filters_path):
+                filters_path = os.path.abspath(filters_path)
                 sys.path.append(os.path.dirname(filters_path))
                 self.filters_module = os.path.splitext(
                     os.path.basename(filters_path))[0]
@@ -306,8 +307,8 @@ class Zenbu:
         # Ignores
         if ignores_path:
             if os.path.exists(ignores_path):
-                self.ignores_path = ignores_path
-                self.watch_paths.add(ignores_path)
+                self.ignores_path = os.path.abspath(ignores_path)
+                self.watch_paths.add(self.ignores_path)
             else:
                 raise NotFoundError(ignores_path, "ignores file")
         else:
