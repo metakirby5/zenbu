@@ -11,7 +11,7 @@ with codecs.open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='zenbu',
-    version='1.0.4',
+    version='1.0.5',
     description='Jinja2 + YAML based config templater.',
     long_description=long_description,
     url='https://github.com/metakirby5/zenbu',
