@@ -76,7 +76,7 @@ from subprocess import call, check_output
 from threading import Timer
 from time import sleep
 from difflib import unified_diff
-from pydoc import pipepager # Dangerously undocumented...
+from pydoc import pipepager  # Dangerously undocumented...
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from termcolor import colored
 from colorlog import ColoredFormatter
@@ -111,6 +111,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())
 
+
 # Autocomplete
 def variable_set_completer(prefix, **kwargs):
     # Use dummy template and dest directory
@@ -138,16 +139,19 @@ def variable_set_completer(prefix, **kwargs):
     else:
         return (v for v in var_sets if v.startswith(prefix))
 
+
 def compgen_completer(prefix, **kwargs):
     out = check_output('compgen -A function -abck',
                        shell=True, universal_newlines=True)
     return (v for v in out.split() if v.startswith(prefix))
+
 
 # Convenience functions
 def make_dirs_and_open(path):
     if not os.path.exists(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))
     return codecs.open(path, 'w', 'utf-8')
+
 
 def diff_colorify(line):
     if re.match(r'^(===|---|\+\+\+|@@)', line):
@@ -160,6 +164,7 @@ def diff_colorify(line):
         return colored(line, 'yellow')
     else:
         return line
+
 
 def deep_update_dict(d, u):
     for k, v in u.items():
@@ -210,6 +215,7 @@ class VariableRenderError(Exception):
     def __init__(self, variable_name, message=None):
         super(VariableRenderError, self).__init__(message)
         self.variable_name = variable_name
+
     def __str__(self):
         msg = "Could not render variable: \"%s\"" % self.variable_name
         if self.message:
@@ -376,7 +382,7 @@ class Zenbu:
         """
         Shallowly resolves variables within variables.
         """
-        rendered = {} # to avoid rendering order problems
+        rendered = {}  # to avoid rendering order problems
         for k, v in vars.items():
             # Recurse
             if isinstance(v, dict):
@@ -431,7 +437,7 @@ class Zenbu:
 
             # Get all the paths...
             for root, _, files in os.walk(self.var_set_path,
-                                                followlinks=True):
+                                          followlinks=True):
 
                 # Don't print the var set dir
                 short_root = self.var_set_path_re.sub('', root)
@@ -451,7 +457,7 @@ class Zenbu:
         Yield pairs of (template file, destination file)
         """
         for root, _, files in os.walk(self.templates_path,
-                                            followlinks=True):
+                                      followlinks=True):
 
             # Substitute the template dir for home dir
             dest_root = os.path.join(
@@ -589,7 +595,7 @@ class Zenbu:
             if os.path.isdir(path):
                 self.observer.schedule(
                     dir_handler,
-                    os.path.realpath(path), # Watch out for symlinks...
+                    os.path.realpath(path),  # Watch out for symlinks...
                     recursive=True)
             else:
                 # Watch the parent directory for the file pattern
@@ -726,6 +732,7 @@ def parse_args():
     argcomplete.autocomplete(parser, always_complete_options=False)
     return parser.parse_args()
 
+
 def main():
     args = parse_args()
 
@@ -814,6 +821,7 @@ def main():
     # Default mode: render and write
     else:
         zenbu.render_and_write()
+
 
 if __name__ == '__main__':
     main()
