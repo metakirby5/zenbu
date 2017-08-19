@@ -516,8 +516,8 @@ class Zenbu:
             try:
                 with codecs.open(dest, 'r', 'utf-8') as f:
                     yield unified_diff(
-                        result.splitlines(True),
                         f.readlines(),
+                        result.splitlines(True),
                         fromfile=dest,
                         tofile='%s (rendered)' % dest)
             except IOError:
