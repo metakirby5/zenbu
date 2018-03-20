@@ -201,6 +201,7 @@ Thanks to
    :target: http://asator.xyz/img/dad9.webm
    :alt: enju on 2bwm.
 .. _wzb-utils: https://github.com/fullsalvo/wzb-utils
+.. _zenbu-git: https://aur.archlinux.org/packages/zenbu-git
 .. _whizkers: https://github.com/metakirby5/whizkers
 .. _Jinja2: http://jinja.pocoo.org/
 .. _Jinja2 Template Designer Documentation:
