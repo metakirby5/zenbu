@@ -18,7 +18,10 @@ Installation
 
 or just move ``zenbu.py`` to somewhere in your ``$PATH``.
 If you do the latter, you must install the dependencies in the
-following section manually.
+following section manually. 
+
+If you are running Arch Linux, you can also use the AUR package zenbu-git_ (AUR).
+
 
 Dependencies
 ------------
