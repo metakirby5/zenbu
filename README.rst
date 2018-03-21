@@ -18,7 +18,10 @@ Installation
 
 or just move ``zenbu.py`` to somewhere in your ``$PATH``.
 If you do the latter, you must install the dependencies in the
-following section manually.
+following section manually. 
+
+If you are running Arch Linux, you can also use the AUR package `zenbu-git`_ (AUR).
+
 
 Dependencies
 ------------
@@ -198,6 +201,7 @@ Thanks to
    :target: http://asator.xyz/img/dad9.webm
    :alt: enju on 2bwm.
 .. _wzb-utils: https://github.com/fullsalvo/wzb-utils
+.. _zenbu-git: https://aur.archlinux.org/packages/zenbu-git
 .. _whizkers: https://github.com/metakirby5/whizkers
 .. _Jinja2: http://jinja.pocoo.org/
 .. _Jinja2 Template Designer Documentation:
