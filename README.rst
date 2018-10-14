@@ -28,7 +28,7 @@ On Gentoo, do
 
 ``layman -s ricerlay``
 
-``emerge x11-misc/zenbu``
+``emerge app-misc/zenbu``
 
 Dependencies
 ------------
