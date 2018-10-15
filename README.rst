@@ -22,13 +22,13 @@ following section manually.
 
 If you are running Arch Linux, you can also use the AUR package `zenbu-git`_ (AUR).
 
-On Gentoo, do
+If you are running Gentoo:
 
-``layman -o https://raw.githubusercontent.com/azahi/ricerlay/master/overlay.xml -f -a ricerlay``
+::
 
-``layman -s ricerlay``
-
-``emerge app-misc/zenbu``
+  layman -o https://raw.githubusercontent.com/azahi/ricerlay/master/overlay.xml -f -a ricerlay
+  layman -s ricerlay
+  emerge app-misc/zenbu
 
 Dependencies
 ------------
