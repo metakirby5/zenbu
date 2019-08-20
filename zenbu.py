@@ -365,7 +365,7 @@ class Zenbu:
 
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
-                to_merge = yaml.load(f.read())
+                to_merge = yaml.load(f.read(), Loader=yaml.FullLoader)
         except IOError:
             raise NotFoundError(name, "variables file")
         except Exception as e:
@@ -408,7 +408,7 @@ class Zenbu:
         """
         try:
             with codecs.open(name, 'r', 'utf-8') as f:
-                to_merge = yaml.load(f.read())
+                to_merge = yaml.load(f.read(), Loader=yaml.FullLoader)
         except Exception as e:
             raise ParseError(e, name)
         else:
