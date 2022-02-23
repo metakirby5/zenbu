@@ -61,7 +61,6 @@ For help on creating filters, refer to
 http://jinja.pocoo.org/docs/dev/api/#custom-filters
 """
 
-import collections
 import logging
 import os
 import sys
@@ -85,6 +84,10 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 
 # Constants
 HOME = os.getenv('HOME')
@@ -168,8 +171,8 @@ def diff_colorify(line):
 
 def deep_update_dict(d, u):
     for k, v in u.items():
-        if isinstance(d, collections.Mapping):
-            if isinstance(v, collections.Mapping):
+        if isinstance(d, Mapping):
+            if isinstance(v, Mapping):
                 r = deep_update_dict(d.get(k, {}), v)
                 d[k] = r
             else:
